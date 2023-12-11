@@ -11,7 +11,7 @@
 // #include "yolov8_utils/bounding_box.hpp"
 #include "yolov8_utils/vision_tracker.hpp"
 using namespace std;
-
+#include "time.h"
 
 std::vector<std::string> getInputFileList(const char* filePath)
 {
@@ -42,30 +42,64 @@ void showTrackedHumanResults(std::vector<TrackedObj>& objList)
   }
 }
 
+bool fileExists(const std::string& path) {
+    FILE *fp;
+    if (fp = fopen(path.c_str(), "r")) {
+        fclose(fp);
+        return true;
+    }
+    return false;
+}
 
 int main(int argc, char **argv)
 {
+
+	// bool img1 = fileExists("/ali/yolov8/in/newyork_walk_2230.jpg");
+	// bool img2 = fileExists("/ali/yolov8/in/newyork_walk_2240.jpg");
+	// bool img3 = fileExists("/ali/yolov8/in/newyork_walk_2250.jpg");
+	// bool img4 = fileExists("/ali/yolov8/in/newyork_walk_2260.jpg");
+	// bool img5 = fileExists("/ali/yolov8/in/newyork_walk_2270.jpg");
+	// bool img6 = fileExists("/ali/yolov8/in/newyork_walk_2280.jpg");
+
+	// cout<<"img1 : "<<img1<<endl;
+	// cout<<"img2 : "<<img2<<endl;
+	// cout<<"img3 : "<<img3<<endl;
+	// cout<<"img4 : "<<img4<<endl;
+	// cout<<"img5 : "<<img5<<endl;
+	// cout<<"img6 : "<<img6<<endl;
+	clock_t start,end;
+	double infer_time;
+
+
 	// ============================================ //
 	//                  Entry Point                 //
 	// ============================================ //
 	int idxFrame = 0;
 	// cv::Mat img;
 	int sig_flag = 0;
-	VisionTracker vTracker("./config/config.txt",argc,argv);
+	VisionTracker vTracker("/ali/yolov8/config/config.txt",argc,argv);
 	VisionTrackingResults result;
 	
 	std::cout << "Start WNC Vision Tracking" << std::endl;
 	std::cout << "-------------------------------------------------" << std::endl;
 	
+
+
 	while(1)
 	{	
+		start = clock();
 		idxFrame += 1;
 
 		// Run Object Tracking (For AMBA, input img is from AMBA tensor)
 		vTracker.run();
-
 		// Get Tracked Results
 		vTracker.getResults(result);
+
+		end = clock();
+
+		infer_time = ((double) (end-start)) / CLOCKS_PER_SEC;
+		
+		cout<<"----------------------infer time :"<<infer_time <<"------------------------------------"<<endl;
 
 		// Show Tracked Results
 		if (vTracker.isFinishDetection())

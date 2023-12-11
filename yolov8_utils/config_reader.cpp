@@ -19,12 +19,9 @@
 ////////////////////////
 TrackerConfigReader::TrackerConfigReader()
 {
+  cout<<"[TrackerConfigReader constructer] Start new Config_S"<<endl;
   m_config = new Config_S();
-
-#if defined (SPDLOG)
-  auto m_logger = spdlog::stdout_color_mt("TrackerConfigReader");
-  m_logger->set_pattern("[%n] [%^%l%$] %v");
-#endif
+  cout<<"[TrackerConfigReader constructer] End new Config_S"<<endl;
 
 };
 
@@ -33,8 +30,23 @@ TrackerConfigReader::~TrackerConfigReader() {};
 
 Config_S* TrackerConfigReader::getConfig()
 {
+  cout<<"[getConfig] Start return m_config"<<endl;
   return m_config;
 }
+
+// yolov8_det.lua file content
+// _nn_arm_nms_config_ = {
+// 	conf_threshold = 0.20,    -- Confidence threshold
+// 	top_k = 200,             -- Top k on each class
+// 	nms_threshold = 0.45,    -- NMS threshold
+// 	class_num = 4,          -- class num
+// 	enable_seg = 0,          -- enable segmentation
+// 	log_level = 2,           -- 0 none, 1 error, 2 notice, 3 debug, 4 verbose
+// 	disable_fsync = 0,       -- disable fsync for live mode when it is 1
+// 	output_0 = "output0",    -- Output name for the detected objects
+// }
+// return _nn_arm_nms_config_
+
 
 
 bool TrackerConfigReader::read(std::string configPath)
@@ -57,22 +69,21 @@ bool TrackerConfigReader::read(std::string configPath)
     // Platform Runtime
     string runtime = "";      // For QCS6490
 
+    // Alister add 2023-12-10
+    // lua file settings
+    string conf_threshold ="";
+    int top_k = 200;
+    string nms_threshold ="";
+    int class_num = 4;
+    int enable_seg = 0;
+    int log_level = 2;
+    int disable_fsync = 0;
+    std::string output = "output_0";
+
     // Model Information
     string modelPath = "";
     int modelWidth = 0;
     int modelHeight = 0;
-    // Alister add 2023-12-09
-    string luapath = "";
-    double confidence = 0.25; 
-    string labelPath = ""; 
-    int classnumber = 0;
-    double nmsthreshold = 0.45;
-    string model = "";
-    string imagedirpath = "";
-    int mode = 0;
-    int loglevel = 0;
-    int drawmode = 0;
-    int rgb = 0;
 
     // Camera Information
     string cameraHeight = "";
@@ -130,24 +141,37 @@ bool TrackerConfigReader::read(std::string configPath)
     // Update the variable by the value present in the configuration file.
     configReader->getValue("Runtime", runtime);
 
+    // yolov8_det.lua file content
+// _nn_arm_nms_config_ = {
+// 	conf_threshold = 0.20,    -- Confidence threshold
+// 	top_k = 200,             -- Top k on each class
+// 	nms_threshold = 0.45,    -- NMS threshold
+// 	class_num = 4,          -- class num
+// 	enable_seg = 0,          -- enable segmentation
+// 	log_level = 2,           -- 0 none, 1 error, 2 notice, 3 debug, 4 verbose
+// 	disable_fsync = 0,       -- disable fsync for live mode when it is 1
+// 	output_0 = "output0",    -- Output name for the detected objects
+// }
+// return _nn_arm_nms_config_
+
+
+    //lua file settings Alister add 2023-12-10
+    configReader->getValue("ConfThreshold",conf_threshold);
+    configReader->getValue("TopK", top_k);
+    configReader->getValue("NMSThreshold", nms_threshold);
+    configReader->getValue("ClassNum", class_num);
+    configReader->getValue("EnableSeg", enable_seg);
+    configReader->getValue("LogLevel", log_level);
+    configReader->getValue("DisableFsync", disable_fsync);
+    configReader->getValue("Output", output);
+
+
+
     // Model Information
     configReader->getValue("ModelPath", modelPath);
     configReader->getValue("ModelWidth", modelWidth);
     configReader->getValue("ModelHeight", modelHeight);
-   
-    // Alister add 2023-12-09
-    configReader->getValue("LuaPath",luapath);
-    configReader->getValue("Confidence",confidence); //ex: 0.15
-    configReader->getValue("LabelPath",labelPath); //ex:/ali/yolov8/label/coco_label_name.txt
-    configReader->getValue("ClassNumber",classnumber); //ex:80
-    configReader->getValue("NMSThreshold",nmsthreshold); //ex:0.45
-    configReader->getValue("Model",model); //ex:yolov8
-    configReader->getValue("ImageDirPath",imagedirpath); //ex:/ali/yolov8/in
-    configReader->getValue("Mode",mode); //ex:mode=1->file model,mode=2->run with dummy,mode=0->live mode
-    configReader->getValue("LogLevel",loglevel);
-    configReader->getValue("DrawMode",drawmode);
-    configReader->getValue("RGB",rgb);
-    
+
     // Camera Information
     configReader->getValue("CameraHeight", cameraHeight);
     configReader->getValue("CameraFocalLength", cameraFocalLength);
@@ -366,8 +390,4 @@ bool TrackerConfigReader::read(std::string configPath)
   configReader = NULL;
 
   return true;
-}
-
-void TrackerConfigReader::getConfig(Config_S *config)
-{
 }

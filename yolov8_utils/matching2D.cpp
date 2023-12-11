@@ -390,8 +390,8 @@ void visualizeKeypoints(const vector<cv::KeyPoint> & keypoints,
     if(displayImageWindows)
     {
         // cv::namedWindow(windowName, 6);
-        imshow(windowName, visImage);
-        cv::waitKey(1);
+        // imshow(windowName, visImage);
+        // cv::waitKey(1);
     }
 
     if(saveImageFiles)

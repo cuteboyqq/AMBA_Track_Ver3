@@ -108,7 +108,7 @@ class Trajectory
   float tYDiffUpper = 0.35;                 // Y diff upper bound
 
   // Debug
-  bool debugMode = true;
+  bool debugMode = false;
 };
 
 #ifdef __cplusplus

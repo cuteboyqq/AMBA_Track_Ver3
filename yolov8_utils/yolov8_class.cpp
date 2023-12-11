@@ -6,11 +6,14 @@
 #include <stdio.h> 
 #include <stdlib.h>
 #include <eazyai.h>
+#include <time.h>
 //#include "nn_lua.h"
 #include "nn_arm.h"
 #include <string.h>
 // #include "yolov8_utils/object.hpp"
 #include "point.hpp"
+#include "pthread.h"
+
 // #include "yolov8_utils/bounding_box.hpp"
 // using namespace cv;
 // #define atoa(x)
@@ -22,11 +25,12 @@ YoloV8_Class::YoloV8_Class(Config_S *config,int argc, char **argv)
   cout<<"new live_ctx_t"<<endl;
   live_ctx = new live_ctx_t;
 
-//   rval = init_param(argc, argv, params);
-//   rval = live_init(live_ctx, params);
-  rval = YoloV8_Class::init_param(argc, argv, params, config);
-  rval = YoloV8_Class::live_init(live_ctx, params);
-
+  cout<<"Start AMBA init_param"<<endl;
+  rval = init_param(argc, argv, params);
+  cout<<"End AMBA init_param"<<endl;
+  cout<<"Start AMBA live_init"<<endl;
+  rval = live_init(live_ctx, params);
+  cout<<"End AMBA live_init"<<endl;
   std::string dlcFilePath = config->modelPath;
   std::string rumtimeStr = config->runtime;
   // Runtime
@@ -39,10 +43,7 @@ YoloV8_Class::YoloV8_Class(Config_S *config,int argc, char **argv)
   _initModelIO();
   printf("[YOLOv8::YOLOv8(Config_S *config)] End   _initModelIO()\n");
   // Output Decoder
-  printf("[YOLOv8::YOLOv8(Config_S *config)] Start  new YOLOv8_Decoder()\n");
-  m_decoder = new YOLOv8_Decoder(m_inputHeight, m_inputWidth);
-  printf("[YOLOv8::YOLOv8(Config_S *config)] End  new YOLOv8_Decoder()\n");
-	
+
 }
 
 YoloV8_Class::YoloV8_Class(int argc, char **argv)
@@ -99,6 +100,16 @@ int YoloV8_Class::init(int argc, char **argv, live_params_t *params, live_ctx_t 
 	rval = live_init(live_ctx,params);
 	return rval;
 };
+
+//Alister add 2023-12-07
+bool YoloV8_Class::fileExists(const std::string& path) {
+    FILE *fp;
+    if (fp = fopen(path.c_str(), "r")) {
+        fclose(fp);
+        return true;
+    }
+    return false;
+}
 
 
 int YoloV8_Class::parse_param(int argc, char **argv, live_params_t *params)
@@ -452,7 +463,7 @@ int YoloV8_Class::init_param(int argc, char **argv, live_params_t *params)
 		EA_LOG_NOTICE("\tcanvas id: %d\n", params->canvas_id);
 		EA_LOG_NOTICE("\tfile name of saving result to txt: %s\n",
 			params->result_f_path);
-
+		
 		if (params->draw_mode == DRAW_BBOX_TEXTBOX) {
 			params->draw_mode = EA_DISPLAY_BBOX_TEXTBOX;
 		} else if (params->draw_mode == DRAW_256_COLORS_IMAGE) {
@@ -464,22 +475,17 @@ int YoloV8_Class::init_param(int argc, char **argv, live_params_t *params)
 	return rval;
 };
 
-// Alister add 2023-12-09
+
 int YoloV8_Class::init_param(int argc, char **argv, live_params_t *params, Config_S *config)
 {
-   int rval = EA_SUCCESS;
+	int rval = EA_SUCCESS;
 
 	memset(params, 0, sizeof(live_params_t));
-	// params->mode = RUN_LIVE_MODE;
-	// params->log_level = EA_LOG_LEVEL_NOTICE;
-	// params->draw_mode = DRAW_BBOX_TEXTBOX;
-	// params->rgb = BGR_PLANAR;
 
-	// Alister 2023-12-09
-	params->mode = config->mode;
-	params->log_level = config->log_level;
-	params->draw_mode = config->draw_mode;
-	params->rgb = config->rgb;
+	params->mode = config->AMBAInitParamConfig.mode;
+	params->log_level = config->AMBALuaConfig.log_level;
+	params->draw_mode = config->AMBAInitParamConfig.draw_mode;
+	params->rgb = config->AMBAInitParamConfig.input_color_type;
 
 	params->yuv_flag = IN_SRC_OFF;
 	params->use_pyramid = IN_SRC_OFF;
@@ -489,10 +495,10 @@ int YoloV8_Class::init_param(int argc, char **argv, live_params_t *params, Confi
 	params->vout_id = DEFAULT_VOUT_ID;
 	params->stream_id = DEFAULT_STREAM_ID;
 
-	params->queue_size = 1;
-	params->thread_num = 1;
-	params->acinf_gpu_id = -1;
-	params->overlay_buffer_offset = -1;
+	params->queue_size = config->AMBAInitParamConfig.queue_size;
+	params->thread_num = config->AMBAInitParamConfig.thread_num;
+	params->acinf_gpu_id = config->AMBAInitParamConfig.acinf_gpu_id;
+	params->overlay_buffer_offset = config->AMBAInitParamConfig.overlay_buffer_offset;
 
 	do {
 		if (argc < 2) {
@@ -541,7 +547,7 @@ int YoloV8_Class::init_param(int argc, char **argv, live_params_t *params, Confi
 		EA_LOG_NOTICE("\tcanvas id: %d\n", params->canvas_id);
 		EA_LOG_NOTICE("\tfile name of saving result to txt: %s\n",
 			params->result_f_path);
-
+		
 		if (params->draw_mode == DRAW_BBOX_TEXTBOX) {
 			params->draw_mode = EA_DISPLAY_BBOX_TEXTBOX;
 		} else if (params->draw_mode == DRAW_256_COLORS_IMAGE) {
@@ -551,7 +557,8 @@ int YoloV8_Class::init_param(int argc, char **argv, live_params_t *params, Confi
 	} while (0);
 
 	return rval;
-}
+};
+
 
 void YoloV8_Class::live_set_post_thread_params(live_params_t *params,
 	post_thread_params_t *post_params)
@@ -610,7 +617,7 @@ int YoloV8_Class::cv_env_init(live_ctx_t *live_ctx, live_params_t *params)
 		RVAL_ASSERT(ctx->ops != NULL);
 		ops = ctx->ops;
 		RVAL_ASSERT(ops->nn_input_init != NULL);
-		RVAL_OK(ops->nn_input_init(ctx));
+		RVAL_OK(ops->nn_input_init(ctx)); //here cause error 2023-12-06
 	} while (0);
 	return rval;
 };
@@ -632,7 +639,7 @@ int YoloV8_Class::live_init(live_ctx_t *live_ctx, live_params_t *params)
 			live_ctx->f_result = open(params->result_f_path, O_CREAT | O_RDWR | O_TRUNC, 0644);
 			RVAL_ASSERT(live_ctx->f_result != -1);
 		}
-		RVAL_OK(cv_env_init(live_ctx, params));
+		RVAL_OK(cv_env_init(live_ctx, params)); //here cause error 2023-12-06
 		ops = live_ctx->nn_input_ctx.ops;
 		RVAL_ASSERT(params->model_path != NULL);
 		memset(&net_params, 0, sizeof(nn_cvflow_params_t));
@@ -658,16 +665,15 @@ int YoloV8_Class::live_init(live_ctx_t *live_ctx, live_params_t *params)
 }
 
 
-
-int YoloV8_Class::run(cv::Mat &imgFrame)
+int YoloV8_Class::run()
 {
 	 
   // STEP1: load image to input tensor
-  if (!loadInput(imgFrame))
-  {
+//   if (!loadInput(imgFrame))
+//   {
 
-    return false;
-  }
+//     return false;
+//   }
   // STEP2: run inference
   int sig_flag = YoloV8_Class::test_yolov8_run();
   if(sig_flag!=0)
@@ -705,12 +711,12 @@ int YoloV8_Class::test_yolov8_run()
 	do {
 		//printf("In test_yolov8_run , start if (params->mode == RUN_DUMMY_MODE) \n");
 		if (params->mode == RUN_DUMMY_MODE) {
-			//printf("Start live_run_loop_dummy\n");
+			printf("Start live_run_loop_dummy\n");
 			sig_flag = live_run_loop_dummy(YoloV8_Class::live_ctx, YoloV8_Class::params); //RVAL_OK
 		} else {
-			//printf("Start live_run_loop_without_dummy\n");
+			printf("Start live_run_loop_without_dummy\n");
 			sig_flag = live_run_loop_without_dummy(YoloV8_Class::live_ctx, YoloV8_Class::params); //RVAL_OK
-			//printf("End live_run_loop_without_dummy\n");
+			printf("End live_run_loop_without_dummy\n");
 		}
 	} while (0);
 	// return rval;
@@ -748,15 +754,20 @@ void YoloV8_Class::yolov8_thread_join()
 
 cv::Mat YoloV8_Class::Get_img()
 {
-	cv::Mat bgr;
+	cv::Mat bgr = cv::Mat::zeros(1920,1080,CV_8UC3);
 	int rval;
-
+	// pthread_mutex_t mutex = PTHREAD_MUTEX_INITIALIZER;
 	cout<<"Start if(live_ctx->thread_ctx.thread->nn_arm_ctx.bgr!=NULL)"<<endl;
-
 	if(live_ctx->thread_ctx.thread->nn_arm_ctx.bgr!=NULL)
-	{
+	{	
+		// pthread_mutex_lock(&mutex);
+		cout<<"Get_img : In if Start"<<endl;
+		// usleep(100);
 		ea_tensor_t *tensor = (ea_tensor_t *)live_ctx->thread_ctx.thread->nn_arm_ctx.bgr;
+		cout<<"Get_img : end tensor"<<endl;
 		rval = tensor2mat_bgr2bgr(tensor, bgr);
+		cout<<"Get_img : In if End"<<endl;
+		// pthread_mutex_unlock(&mutex);
 	}
 	else
 	{	
@@ -1000,14 +1011,37 @@ int YoloV8_Class::Get_Yolov8_Bounding_Boxes(std::vector<BoundingBox> &bboxList,c
 int YoloV8_Class::tensor2mat_bgr2bgr(ea_tensor_t *tensor, cv::Mat &bgr)
 {
 	int rval = EA_SUCCESS;
+	printf("Start tensor2mat_bgr2bgr~~~~~~~\n");
+	printf("Get *c1~*c3_data\n");
 	void *c1_data = ea_tensor_data_for_read(tensor, EA_CPU);
 	void *c2_data = (uint8_t *)ea_tensor_data_for_read(tensor, EA_CPU) + ea_tensor_shape(tensor)[2] * ea_tensor_pitch(tensor);
 	void *c3_data = (uint8_t *)ea_tensor_data_for_read(tensor, EA_CPU) + ea_tensor_shape(tensor)[2] * ea_tensor_pitch(tensor) * 2;
+	
+	if (c1_data==NULL ||  c2_data==NULL || c3_data==NULL){
+		if (c1_data == NULL){
+			printf("c1_data is NULL \n");
+		}
+
+		if (c2_data == NULL){
+			printf("c2_data is NULL \n");
+		}
+
+
+		if (c3_data == NULL){
+			printf("c3_data is NULL \n");
+		}
+			
+		return EA_FAIL;
+	} 
+	
+	printf("[tensor2mat_bgr2bgr] Start Create cv::Mat c1 , c2 , c3 \n");
 	cv::Mat c1(ea_tensor_shape(tensor)[2], ea_tensor_shape(tensor)[3], CV_8UC1, c1_data, ea_tensor_pitch(tensor));
 	cv::Mat c2(ea_tensor_shape(tensor)[2], ea_tensor_shape(tensor)[3], CV_8UC1, c2_data, ea_tensor_pitch(tensor));
 	cv::Mat c3(ea_tensor_shape(tensor)[2], ea_tensor_shape(tensor)[3], CV_8UC1, c3_data, ea_tensor_pitch(tensor));
+	printf("[tensor2mat_bgr2bgr] End Create cv::Mat c1 , c2 , c3 \n");
 	std::vector<cv::Mat> channels;
-
+	channels.clear();
+	printf("[tensor2mat_bgr2bgr] start put c1~c3 into channels\n");
 	do {
 		if (ea_tensor_shape(tensor)[1] == 1) {
 			channels.push_back(c1);
@@ -1023,10 +1057,11 @@ int YoloV8_Class::tensor2mat_bgr2bgr(ea_tensor_t *tensor, cv::Mat &bgr)
 			rval = EA_FAIL;
 			break;
 		}
-
+		printf("[tensor2mat_bgr2bgr] Start merge channels into bgr image \n");
 		cv::merge(channels, bgr);
+		printf("[tensor2mat_bgr2bgr] End merge channels into bgr image \n");
 	} while (0);
-
+	printf("End of tensor2mat_bgr2bgr~~~~~~~\n");
 	return rval;
 }
 
@@ -1279,17 +1314,34 @@ int YoloV8_Class::live_update_net_output(live_ctx_t *live_ctx,
 	ea_queue_t *queue = NULL;
 	int i;
 	vp_output_t *tmp;
+	cout<<"[live_update_net_output] Start do while"<<endl;
 	do {
+		cout<<"[live_update_net_output] Start post_thread_queue"<<endl;
 		queue = post_thread_queue(&live_ctx->thread_ctx);
+		cout<<"[live_update_net_output] End post_thread_queue"<<endl;
+
+		cout<<"[live_update_net_output] Start Create ea_queue_request_carrier"<<endl;
 		*vp_output = (vp_output_t *)ea_queue_request_carrier(queue);
+		cout<<"[live_update_net_output] End Create ea_queue_request_carrier"<<endl;
+
+		cout<<"Start check *vp_output != NULL"<<endl;
 		RVAL_ASSERT(*vp_output != NULL);
+		cout<<"End check *vp_output != NULL"<<endl;
+
 		tmp = *vp_output;
+
+		cout<<"[live_update_net_output] Start Assign tmp->out_num"<<endl;
 		tmp->out_num = live_ctx->nn_cvflow.out_num;
+		cout<<"[live_update_net_output] End Assign tmp->out_num"<<endl;
+
+		cout<<"[live_update_net_output] Start for loop ea_net_update_output"<<endl;
 		for (i = 0; i < tmp->out_num; i++) {
 			ea_net_update_output(live_ctx->nn_cvflow.net, tmp->out[i].tensor_name,
 				tmp->out[i].out);
 		}
+		cout<<"[live_update_net_output] End for loop ea_net_update_output"<<endl;
 	} while (0);
+	cout<<"[live_update_net_output] End do while"<<endl;
 	return rval;
 };
 
@@ -1365,7 +1417,8 @@ int YoloV8_Class::live_convert_yuv_data_to_bgr_data_for_postprocess(live_params_
 
 int YoloV8_Class::live_run_loop_without_dummy(live_ctx_t *live_ctx, 
                                         live_params_t *params)
-{
+{	
+	cout<<"===============In Function : live_run_loop_without_dummy======================="<<endl;
 	int rval = EA_SUCCESS;
 	int i = 0;
 	ea_calc_fps_ctx_t calc_fps_ctx;
@@ -1377,12 +1430,18 @@ int YoloV8_Class::live_run_loop_without_dummy(live_ctx_t *live_ctx,
 	nn_input_ops_type_t *ops = NULL;
 	memset(&calc_fps_ctx, 0, sizeof(ea_calc_fps_ctx_t));
 	int fps_notice_flag = 0;
+	cout<<"[live_run_loop_without_dummy] Start do while"<<endl;
 	do {
 		RVAL_ASSERT(live_ctx != NULL);
 		ops = live_ctx->nn_input_ctx.ops;
 		RVAL_ASSERT(ops->nn_input_hold_data != NULL);
+		cout<<"Start live_update_net_output"<<endl;
 		RVAL_OK(YoloV8_Class::live_update_net_output(live_ctx, &vp_output));
+		cout<<"End live_update_net_output"<<endl;
+
+		cout<<"Start post_thread_get_img_set"<<endl;
 		img_set = post_thread_get_img_set(&live_ctx->thread_ctx, live_ctx->seq);
+		cout<<"End post_thread_get_img_set"<<endl;
 		live_ctx->seq++;
 		for (i = 0; i < live_ctx->nn_cvflow.in_num; i++) {
 			RVAL_OK(ops->nn_input_hold_data(&live_ctx->nn_input_ctx,
@@ -1403,7 +1462,9 @@ int YoloV8_Class::live_run_loop_without_dummy(live_ctx_t *live_ctx,
 		}
 		vp_output->arg = img_set;
 		EA_MEASURE_TIME_START();
+		cout<<"Start nn_cvflow_inference"<<endl;
 		RVAL_OK(nn_cvflow_inference(&live_ctx->nn_cvflow));
+		cout<<"End nn_cvflow_inference"<<endl;
 		live_ctx->loop_count--;
 		if (live_ctx->loop_count == 0) {
 			EA_MEASURE_TIME_END("network forward time: ");
@@ -1423,10 +1484,12 @@ int YoloV8_Class::live_run_loop_without_dummy(live_ctx_t *live_ctx,
 			RVAL_OK(ea_tensor_sync_cache(vp_output->out[i].out, EA_VP, EA_CPU));
 		}
 		RVAL_BREAK();
+		cout<<"[live_run_loop_without_dummy] Start post_thread_queue"<<endl;
 		queue = post_thread_queue(&live_ctx->thread_ctx);
+		cout<<"[live_run_loop_without_dummy] End post_thread_queue"<<endl;
 		RVAL_OK(ea_queue_en(queue, vp_output));
 	} while (0);
-
+	cout<<"[live_run_loop_without_dummy] End do while"<<endl;
 	// return rval;
 	return live_ctx->sig_flag;
 };
@@ -1598,24 +1661,13 @@ YoloV8_Class::YoloV8_Class(Config_S *config)  // main function
   printf("[YOLOv8::YOLOv8(Config_S *config)] Start   _initModelIO()\n");
   _initModelIO();
   printf("[YOLOv8::YOLOv8(Config_S *config)] End   _initModelIO()\n");
-  // Output Decoder
-  printf("[YOLOv8::YOLOv8(Config_S *config)] Start  new YOLOv8_Decoder()\n");
-  m_decoder = new YOLOv8_Decoder(m_inputHeight, m_inputWidth);
-  printf("[YOLOv8::YOLOv8(Config_S *config)] End  new YOLOv8_Decoder()\n");
+  // Output Decoder~VisionTracker
+
 };
 
 
 YoloV8_Class::~YoloV8_Class()  // clear object memory
 {
-  delete m_decoder;
-  delete m_detectionBoxBuff;
-  delete m_detectionConfBuff;
-  delete m_detectionClsBuff;
-
-  m_decoder = nullptr;
-  m_detectionBoxBuff = nullptr;
-  m_detectionConfBuff = nullptr;
-  m_detectionClsBuff = nullptr;
 
 
 	post_thread_deinit( &live_ctx->thread_ctx, &live_ctx->nn_cvflow);
@@ -1676,18 +1728,12 @@ bool YoloV8_Class::_initModelIO()
     With the input dimensions computed create a tensor to convey the input into the network. */
   // m_inputTensor = zdl::SNPE::SNPEFactory::getTensorFactory().createTensor(inputShape);
 
-  // Create a buffer to store image data
-  m_inputBuff.resize(m_inputChannel*m_inputHeight*m_inputWidth);
+
 
   // m_logger->info("Create Model Output Buffers");
   // m_logger->info("-------------------------------------------");
 
-  m_detectionBoxSize = 5*NUM_BBOX;
-  m_detectionConfSize = NUM_BBOX;
-  m_detectionClassSize = NUM_BBOX;
-  m_detectionBoxBuff = new float[m_detectionBoxSize];
-  m_detectionConfBuff = new float[m_detectionConfSize];
-  m_detectionClsBuff = new float[m_detectionClassSize];
+
 
   return true;
 }
@@ -2197,162 +2243,8 @@ bool YoloV8_Class::getHumanBoundingBox(
 //                Load Inputs
 // ============================================
 
-bool YoloV8_Class::loadInput(std::string filePath)
-{
-  // auto m_logger = spdlog::get("YOLOv8");
-
-  // m_logger->debug("\n===================================");
-  // m_logger->debug("[File] => {}", filePath);
-  // m_logger->debug("===================================");
-
-  // Preprocessing
-  preProcessingFile(filePath);
-
-  auto time_0 = std::chrono::high_resolution_clock::now();
-
-  // if (m_inputTensor->getSize() != m_inputBuff.size())
-  // {
-    // m_logger->error("Size of input does not match network.");
-    // m_logger->error("Expecting: {}", m_inputTensor->getSize());
-    // m_logger->error("Got: {}", m_inputBuff.size());
-
-  //   return false;
-  // }
-
-  /* Copy the loaded input file contents into the networks input tensor.
-    SNPE's ITensor supports C++ STL functions like std::copy() */
-  // std::copy(m_inputBuff.begin(), m_inputBuff.end(), m_inputTensor->begin());
-
-  auto time_1 = std::chrono::high_resolution_clock::now();
-
-  // m_logger->debug("[Load Input]: \t{} ms", \
-  //   std::chrono::duration_cast<std::chrono::nanoseconds>(time_1 - time_0).count() / (1000.0 * 1000));
-
-  return true;
-}
 
 
-bool YoloV8_Class::loadInput(cv::Mat &imgFrame)
-{
-  // auto m_logger = spdlog::get("YOLOv8");
-
-  // Preprocessing
-  if (!preProcessingMemory(imgFrame))
-  {
-    // m_logger->error("Data Preprocessing Failed");
-
-    return false;
-  }
-
-  auto time_0 = std::chrono::high_resolution_clock::now();
-
-  // if (m_inputTensor->getSize() != m_inputBuff.size())
-  // {
-    // m_logger->error("Size of input does not match network.");
-    // m_logger->error("Expecting: {}", m_inputTensor->getSize());
-    // m_logger->error("Got: {}", m_inputBuff.size());
-
-  //   return false;
-  // }
-
-  /* Copy the loaded input file contents into the networks input tensor.
-    SNPE's ITensor supports C++ STL functions like std::copy() */
-  // std::copy(m_inputBuff.begin(), m_inputBuff.end(), m_inputTensor->begin());
-
-  auto time_1 = std::chrono::high_resolution_clock::now();
-
-  // m_logger->debug("[Load Input]: \t{} ms", \
-  //   std::chrono::duration_cast<std::chrono::nanoseconds>(time_1 - time_0).count() / (1000.0 * 1000));
-
-  return true;
-}
-
-
-bool YoloV8_Class::_loadImageFile(const std::string& inputFile)
-{
-  // auto m_logger = spdlog::get("YOLOv8");
-  auto time_0 = std::chrono::high_resolution_clock::now();
-
-  m_img = cv::imread(inputFile, -1);
-  if (m_img.empty())
-  {
-    // m_logger->error("image don't exist!");
-    return false;
-  }
-
-  auto time_1 = std::chrono::high_resolution_clock::now();
-  // m_logger->debug("[Read Image]: \t{} ms", \
-  //   std::chrono::duration_cast<std::chrono::nanoseconds>(time_1 - time_0).count() / (1000.0 * 1000));
-
-  return true;
-}
-
-// ============================================
-//               Pre Processing
-// ============================================
-bool YoloV8_Class::preProcessingFile(std::string imgPath)
-{
-  _loadImageFile(imgPath);
-  _imgPreprocessing();
-  return true;
-}
-
-bool YoloV8_Class::preProcessingMemory(cv::Mat &imgFrame)
-{
-  // auto m_logger = spdlog::get("YOLOv8");
-
-  if (imgFrame.empty())
-  {
-    //m_logger->error("Image don't exists!");
-    return false;
-  }
-  else
-  {
-    m_img = imgFrame;
-  }
-
-  _imgPreprocessing();
-
-  return true;
-}
-
-bool YoloV8_Class::_imgPreprocessing()
-{
-  // auto m_logger = spdlog::get("YOLOv8");
-
-  int imageSize = m_inputChannel*m_inputHeight*m_inputWidth;
-  cv::Size inputSize = cv::Size(m_inputWidth, m_inputHeight);
-  cv::Mat imgResized;
-  cv::Mat sample;
-  cv::Mat sampleNorm;
-
-  auto time_0 = std::chrono::high_resolution_clock::now();
-
-  if (m_img.size() != inputSize)
-  {
-    cv::resize(m_img, imgResized, inputSize, cv::INTER_LINEAR);
-  }
-  else
-  {
-    imgResized = m_img;
-  }
-  m_imgResized = imgResized;
-
-  // BGR to RGB
-  cv::cvtColor(imgResized, sample, cv::COLOR_BGR2RGB);
-
-  // Normalize
-  sample.convertTo(sampleNorm, CV_32F, 1.0 / 255, 0);
-
-
-  std::memcpy(&m_inputBuff[0], sampleNorm.data, imageSize*sizeof(float));
-
-  auto time_1 = std::chrono::high_resolution_clock::now();
-  //m_logger->debug("[Pre-Proc]: \t{}",\
-    std::chrono::duration_cast<std::chrono::nanoseconds>(time_1 - time_0).count() / (1000.0 * 1000));
-
-  return true;
-}
 
 
 // ============================================

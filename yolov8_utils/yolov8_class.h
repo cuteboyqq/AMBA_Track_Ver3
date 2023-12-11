@@ -109,19 +109,17 @@ class YoloV8_Class
                         char **argv, 
                         live_params_t *params);
 
+        // Alister add 2023-12-11
+        int init_param(int argc, 
+                        char **argv, 
+                        live_params_t *params, 
+                        Config_S *config);
+
+
         int live_init(live_ctx_t *live_ctx, 
                     live_params_t *params);
 
-        // Alister add 2023-12-09
-        int init_param(int argc, 
-                        char **argv, 
-                        live_params_t *params,
-                        Config_S *config);
-        // Alister add 2023-12-09
-        // int live_init(live_ctx_t *live_ctx, 
-        //             live_params_t *params,
-        //             Config_S *config);
-        
+
         int test_yolov8_run_2(live_ctx_t *live_ctx, 
                         live_params_t *params);
 
@@ -181,10 +179,7 @@ class YoloV8_Class
         // Detection
        // Detection
         // I/O
-        bool loadInput(std::string filePath);
-        bool loadInput(cv::Mat &imgFrame);
-        bool _loadImageFile(const std::string& inputFile);
-
+      
         bool getHumanBoundingBox(
         vector<BoundingBox> &_outHumanBboxList,
         float confidenceHuman,
@@ -215,13 +210,17 @@ class YoloV8_Class
         //BoundingBox &fcwROI);
 
         //==================Add Tracking======================================================
-        int run(cv::Mat &imgFrame);
+        int run();
 
         // Others
         // Debug
         // void getDebugLogs();
         void debugON();
         void showProcTime();
+        
+        //Alister add 2023-12-07
+        bool fileExists(const std::string& path);
+        
 
      private:
         int parse_param(int argc, char **argv, 
@@ -280,9 +279,7 @@ class YoloV8_Class
         // I/O
         bool _initModelIO();
         // bool _loadImageFile(const std::string& inputFile);
-        bool _imgPreprocessing();
-        bool preProcessingMemory(cv::Mat &imgFrame);
-        bool preProcessingFile(std::string imgPath);
+        
         // bool _getITensor(float* yoloOutput, const zdl::DlSystem::ITensor* tensor);
         bool _getOutputTensor();
 
@@ -308,7 +305,6 @@ class YoloV8_Class
         int m_detectionConfSize = 0;
         int m_detectionClassSize = 0;
 
-        std::vector<float> m_inputBuff;
 
         // zdl::DlSystem::TensorShape m_inputTensorShape;
         // std::unique_ptr<zdl::DlSystem::ITensor> m_inputTensor;
@@ -318,12 +314,8 @@ class YoloV8_Class
         // zdl::DlSystem::TensorMap m_outputTensorMap;
         BoundingBox* m_dummyBox;
 
-        // Output (Yolo Decoder)
-        YOLOv8_Decoder *m_decoder;
 
-        float* m_detectionBoxBuff;
-        float* m_detectionConfBuff;
-        float* m_detectionClsBuff;
+
 
         std::vector<std::string> m_outputTensorList = {
         "box",

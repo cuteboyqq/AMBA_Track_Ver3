@@ -104,6 +104,49 @@ typedef struct
 } ShowProcTime_Config_S;
 
 
+// yolov8_det.lua file content
+// _nn_arm_nms_config_ = {
+// 	conf_threshold = 0.20,    -- Confidence threshold
+// 	top_k = 200,             -- Top k on each class
+// 	nms_threshold = 0.45,    -- NMS threshold
+// 	class_num = 4,          -- class num
+// 	enable_seg = 0,          -- enable segmentation
+// 	log_level = 2,           -- 0 none, 1 error, 2 notice, 3 debug, 4 verbose
+// 	disable_fsync = 0,       -- disable fsync for live mode when it is 1
+// 	output_0 = "output0",    -- Output name for the detected objects
+// }
+// return _nn_arm_nms_config_
+
+// AMBa lua config , Alister add 2023-12-11
+typedef struct
+{
+  float conf_threshold;
+  int top_k;
+  float nms_threshold;
+  int class_num;
+  int enable_seg;
+  int log_level;
+  int disable_fsync;
+  std::string output_0;
+
+} AMBA_Lua_Config;
+
+// AMBA init parameter settings
+typedef struct
+{
+  int mode;
+  int draw_mode;
+  int input_color_type;
+  int yuv_flag;
+  int use_pyramid;
+  int enable_fsync_flag;
+  int queue_size;
+  int thread_num;
+  int acinf_gpu_id;
+  int overlay_buffer_offset;
+
+} AMBA_Init_Param_Config;
+
 typedef struct
 {
   std::string runtime;        // QCS6490
@@ -112,20 +155,6 @@ typedef struct
   // Model Input Size
   int modelWidth;
   int modelHeight;
-
-  // Alister add 2023-12-09
-  std::string luapath;
-  double confidence; 
-  std::string labelPath; 
-  int classnumber;
-  double nmsthreshold;
-  std::string model;
-  std::string imagedirpath;
-  // Alister add 2023-12-09
-  int mode;
-	int log_level;
-	int draw_mode;
-	int rgb;
 
   // Frame Size
   int frameWidth;
@@ -142,6 +171,23 @@ typedef struct
   Debug_Config_S stDebugConfig;
   Display_Config_S stDisplayConfig;
   ShowProcTime_Config_S stShowProcTimeConfig;
+
+  // AMBA Lua Config (Aliser add 2023-12-11) 
+  AMBA_Lua_Config AMBALuaConfig;
+
+  // AMBA Init Param Config (Alister add 2023-12-11)
+  AMBA_Init_Param_Config AMBAInitParamConfig;
+
+  //lua file setting
+  float conf_threshold;
+  int top_k;
+  float nms_threshold;
+  int class_num;
+  int enable_seg;
+  int log_level;
+  int disable_fsync;
+  std::string output;
+
 
 } Config_S;
 

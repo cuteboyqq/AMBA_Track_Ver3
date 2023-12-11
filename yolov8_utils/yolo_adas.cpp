@@ -1113,8 +1113,8 @@ void YOLOADAS::_noiseRemoval(cv::Mat &laneMask)
 {
   imgUtil::findMaxContour(laneMask, laneMask);
 
-  if (m_debugMode)
-    cv::imshow("lane mask orig (proc)", laneMask);
+  // if (m_debugMode)
+  //   cv::imshow("lane mask orig (proc)", laneMask);
 }
 
 
@@ -1126,8 +1126,8 @@ void YOLOADAS::_masksMerging(cv::Mat &laneMask)
       laneMask += m_prevLaneMaskList[i];
   }
 
-  if (m_debugMode)
-    cv::imshow("lane mask merge", laneMask);
+  // if (m_debugMode)
+  //   cv::imshow("lane mask merge", laneMask);
 }
 
 
@@ -1135,8 +1135,8 @@ void YOLOADAS::_calibrateLaneMask()
 {
   auto m_logger = spdlog::get("YOLO-ADAS");
 
-  if (m_debugMode)
-    cv::imshow("lane mask orig", m_mainLaneMask);
+  // if (m_debugMode)
+  //   cv::imshow("lane mask orig", m_mainLaneMask);
 
   _noiseRemoval(m_mainLaneMask);
 
@@ -1630,7 +1630,7 @@ void YOLOADAS::genTrackObjectImage(cv::Mat &imgFrame, vector<Object> objectList)
   resFile = resFile.insert(resFile.rfind("."), "_result");
   // cv::imwrite(resFile, img);
 
-  cv::imshow("Detection Result", img);
+  // cv::imshow("Detection Result", img);
 }
 
 

@@ -12,6 +12,7 @@
 */
 
 #include "vision_tracker.hpp"
+#include "time.h"
 
 VisionTracker::VisionTracker(std::string configPath, int argc, char **argv)
 {
@@ -76,6 +77,7 @@ VisionTracker::~VisionTracker()
   m_vehicleTracker = nullptr;
   m_motorbikeTracker = nullptr;
   m_roi = nullptr;
+
 };
 
 
@@ -138,7 +140,7 @@ bool VisionTracker::_init(std::string configPath)
 
   // Video Frame
   m_img = cv::Mat(cv::Size(m_videoWidth, m_videoHeight), CV_8UC3, cv::Scalar::all(0));
-
+  m_dsp_imgResize = cv::Mat(cv::Size(1024, 640), CV_8UC3, cv::Scalar::all(0));
   // Processing
   m_frameStep = m_config->procFrameStep;
 
@@ -178,42 +180,37 @@ bool VisionTracker::_init(std::string configPath)
 
 bool VisionTracker::_init(std::string configPath,int argc, char **argv)
 {
-#if defined (SPDLOG)
-  auto m_logger = spdlog::get("VisionTracker");
-#endif
-
+  cout<<"[_init] Start getDateTime"<<endl;
   // Get Date Time
   utils::getDateTime(m_dbg_dateTime);
+  cout<<"[_init] End getDateTime"<<endl;
 
   // Read VisionTracker Configuration
+  cout<<"[_init] Start new Config_S"<<endl;
   m_config = new Config_S();
+  cout<<"[_init] Start new TrackerConfigReader"<<endl;
   m_configReader = new TrackerConfigReader();
+  cout<<"[_init] Start TrackerConfigReader -> read"<<endl;
   m_configReader->read(configPath);
-#if defined (SPDLOG)
-  m_logger->info("Read configuration file ... Done");
-#endif
-  m_config = m_configReader->getConfig();
 
-#if defined (SPDLOG)
-  m_logger->info("Set configuration ... Done");
-#endif
+  cout<<"[_init] Start TrackerConfigReader -> getConfig"<<endl;
+  m_config = m_configReader->getConfig();
+  cout<<"[_init] End TrackerConfigReader -> getConfig"<<endl;
+
 
   // Create AI model
+  cout<<"[_init] Start checkFileExists(m_config->modelPath)"<<endl;
+  cout<<"m_config->modelPath = "<<m_config->modelPath<<endl;
   if (utils::checkFileExists(m_config->modelPath))
   {
     cout<<"Start creat YoloV8_Class"<<endl;
     m_yolov8 = new YoloV8_Class(m_config,argc,argv);
     cout<<"End creat YoloV8_Class"<<endl;
-#if defined (SPDLOG)
-    m_logger->info("Init AI model ... Done");
-#endif
+
   }
   else
   {
-#if defined (SPDLOG)
-    m_logger->error("Can not find AI model {}", m_config->modelPath);
-    m_logger->error("Stop VisionTracker ...");
-#endif
+    cout<<"[_init] checkFileExists(m_config->modelPath) is not exist, exit(0)"<<endl;
     exit(0);
   }
 
@@ -221,9 +218,7 @@ bool VisionTracker::_init(std::string configPath,int argc, char **argv)
   cout<<"start _initROI"<<endl;
   _initROI();
   cout<<"end _initROI"<<endl;
-#if defined (SPDLOG)
-  m_logger->info("Init ROI ... Done");
-#endif
+
 
   // Video Input Size
   m_videoWidth = m_config->frameWidth;
@@ -235,7 +230,7 @@ bool VisionTracker::_init(std::string configPath,int argc, char **argv)
 
   // Video Frame
   m_img = cv::Mat(cv::Size(m_videoWidth, m_videoHeight), CV_8UC3, cv::Scalar::all(0));
-
+  m_dsp_imgResize = cv::Mat(cv::Size(1024, 640), CV_8UC3, cv::Scalar::all(0));
   // Processing
   m_frameStep = m_config->procFrameStep;
 
@@ -270,9 +265,7 @@ bool VisionTracker::_init(std::string configPath,int argc, char **argv)
   cout<<"End _readDisplayConfig"<<endl;
   // _readShowProcTimeConfig();   // Show Processing Time Configuration
   // cout<<"End _readShowProcTimeConfig"<<endl;
-#if defined (SPDLOG)
-  m_logger->info("Init VisionTracker ... Done");
-#endif
+
 
   return SUCCESS;
 }
@@ -281,9 +274,7 @@ bool VisionTracker::_init(std::string configPath,int argc, char **argv)
 
 bool VisionTracker::_readDebugConfig()
 {
-#if defined (SPDLOG)
-  auto m_logger = spdlog::get("VisionTracker");
-#endif
+
 
   if (m_config->stDebugConfig.tracking)
   {
@@ -320,54 +311,21 @@ bool VisionTracker::_readDebugConfig()
   }
   if (m_config->stDebugConfig.logsDirPath != "")
   {
-    m_dbg_logsDirPath = m_config->stDebugConfig.logsDirPath + "/" + m_dbg_dateTime;
+    // m_dbg_logsDirPath = m_config->stDebugConfig.logsDirPath + "/" + m_dbg_dateTime;
+    m_dbg_logsDirPath = m_config->stDebugConfig.logsDirPath;
 
-    if (m_config->stDebugConfig.saveLogs && utils::createDirectories(m_dbg_logsDirPath))
-    {
-#if defined (SPDLOG)
-      m_logger->info("Folders created successfully: {}", m_dbg_logsDirPath);
-#endif
-    }
-    else
-    {
-#if defined (SPDLOG)
-      m_logger->info("Error creating folders: {}", m_dbg_logsDirPath);
-#endif
-    }
   }
   if (m_config->stDebugConfig.imgsDirPath != "")
   {
-    m_dbg_imgsDirPath = m_config->stDebugConfig.imgsDirPath + "/" + m_dbg_dateTime;
+    // m_dbg_imgsDirPath = m_config->stDebugConfig.imgsDirPath + "/" + m_dbg_dateTime;
+     m_dbg_imgsDirPath = m_config->stDebugConfig.imgsDirPath;
 
-    if (m_config->stDebugConfig.saveImages && utils::createDirectories(m_dbg_imgsDirPath))
-    {
-#if defined (SPDLOG)
-      m_logger->info("Folders created successfully: {}", m_dbg_imgsDirPath);
-#endif
-    }
-    else
-    {
-#if defined (SPDLOG)
-      m_logger->info("Error creating folders: {}", m_dbg_imgsDirPath);
-#endif
-    }
   }
   if (m_config->stDebugConfig.rawImgsDirPath != "")
   {
-    m_dbg_rawImgsDirPath = m_config->stDebugConfig.rawImgsDirPath + "/" + m_dbg_dateTime;
+    // m_dbg_rawImgsDirPath = m_config->stDebugConfig.rawImgsDirPath + "/" + m_dbg_dateTime;
+     m_dbg_rawImgsDirPath = m_config->stDebugConfig.rawImgsDirPath;
 
-    if (m_config->stDebugConfig.saveRawImages && utils::createDirectories(m_dbg_rawImgsDirPath))
-    {
-#if defined (SPDLOG)
-      m_logger->info("Folders created successfully: {}", m_dbg_rawImgsDirPath);
-#endif
-    }
-    else
-    {
-#if defined (SPDLOG)
-      m_logger->info("Error creating folders: {}", m_dbg_rawImgsDirPath);
-#endif
-    }
   }
 
   return SUCCESS;
@@ -567,12 +525,17 @@ bool VisionTracker::_initROI()
 
 bool VisionTracker::run(cv::Mat &imgFrame)
 {
-cout<<"Start Get_img"<<endl;
-imgFrame = m_yolov8->Get_img();
-cout<<"End Get_img"<<endl;
-#if defined (SPDLOG)
-  auto m_logger = spdlog::get("VisionTracker");
-#endif
+
+clock_t start, end;
+double infer_time_without_saving_image;
+
+start = clock();
+
+
+// cout<<"Start Get_img"<<endl;
+// imgFrame = m_yolov8->Get_img();
+// cout<<"End Get_img"<<endl;
+
   auto time_0 = std::chrono::high_resolution_clock::now();
   auto time_1 = std::chrono::high_resolution_clock::now();
 
@@ -580,10 +543,7 @@ cout<<"End Get_img"<<endl;
 
   if (m_img.empty())
   {
-#if defined (SPDLOG)
-    m_logger->warn("Input image is empty");
-#endif
-   
+
     return false;
   }
 
@@ -593,21 +553,12 @@ cout<<"End Get_img"<<endl;
   // Entry Point
   if (m_frameIdx % m_frameStep == 0)
   {
-#if defined (SPDLOG)
-    m_logger->info("");
-    m_logger->info("========================================");
-    m_logger->info("Frame Index: {}", m_frameIdx);
-    m_logger->info("========================================");
-#endif
     // Get Image Frame
     m_img = imgFrame.clone();
    
     // AI Inference
-    if (!_modelInfernece(m_img))
+    if (!_modelInfernece())
     {
-#if defined (SPDLOG)
-      m_logger->error("AI model inference failed ... STOP VisionTracker");
-#endif
       ret = FAILURE;
       exit(1);
     }
@@ -616,38 +567,29 @@ cout<<"End Get_img"<<endl;
     // Alister 2023-11-22
     if (!_objectDetection())
     {
-#if defined (SPDLOG)
-      m_logger->warn("Detect objects failed ...");
-#endif
       ret = FAILURE;
     }
     // Object Tracking
     if (!_objectTracking())
     {
-#if defined (SPDLOG)
-      m_logger->warn("Track objects failed ...");
-#endif
+
       ret = FAILURE;
     }
+
+    end = clock();
+
+    infer_time_without_saving_image = ((double)(end-start))/CLOCKS_PER_SEC;
+    cout<<"--------------infer_time_without_saving_image : "<<infer_time_without_saving_image<<"----------------"<<endl;
     // Show Results
     _showDetectionResults();
-#if defined (SPDLOG)
-    // Save Results to Debug Logs
-    if (m_dbg_saveLogs)
-    {
-      _saveDetectionResults();
-    }
-#endif
+
     //
     m_preparingNextDetection = false;
 
     if (m_estimateTime)
     {
       time_1 = std::chrono::high_resolution_clock::now();
-#if defined (SPDLOG)
-      m_logger->info("");
-      m_logger->info("Processing Time: \t{} ms", std::chrono::duration_cast<std::chrono::nanoseconds>(time_1 - time_0).count() / (1000.0 * 1000));
-#endif
+
     }
   }
   else
@@ -676,10 +618,17 @@ cout<<"End Get_img"<<endl;
 
 bool VisionTracker::run()
 {
-cv::Mat imFrame = m_yolov8->Get_img();
-#if defined (SPDLOG)
-  auto m_logger = spdlog::get("VisionTracker");
-#endif
+
+clock_t start, end;
+double track_take_time;
+
+
+  printf(" [run] Start get image \n");
+  cv::Mat imFrame = m_yolov8->Get_img();
+  printf(" [run] End get image \n");
+
+
+
   auto time_0 = std::chrono::high_resolution_clock::now();
   auto time_1 = std::chrono::high_resolution_clock::now();
 
@@ -687,74 +636,58 @@ cv::Mat imFrame = m_yolov8->Get_img();
 
   if (m_img.empty())
   {
-#if defined (SPDLOG)
-    m_logger->warn("Input image is empty");
-#endif
-   
     return false;
   }
 
   // Get Image Frame
+  printf(" [run] Start clone img --> m_dsp_img \n");
   if (m_dsp_results) m_dsp_img = imFrame.clone();
-
+  printf(" [run] End clone img --> m_dsp_img \n");
   // Entry Point
   if (m_frameIdx % m_frameStep == 0)
   {
-#if defined (SPDLOG)
-    m_logger->info("");
-    m_logger->info("========================================");
-    m_logger->info("Frame Index: {}", m_frameIdx);
-    m_logger->info("========================================");
-#endif
+
     // Get Image Frame
+    printf(" [run] Start clone img --> m_img \n");
     m_img = imFrame.clone();
-   
+    printf(" [run] End clone img --> m_img \n");
     // AI Inference
-    if (!_modelInfernece(m_img))
+    if (!_modelInfernece())
     {
-#if defined (SPDLOG)
-      m_logger->error("AI model inference failed ... STOP VisionTracker");
-#endif
+
       ret = FAILURE;
       exit(1);
     }
 
     // Get Detected Bounding Boxes
     // Alister 2023-11-22
+
+    start = clock();
     if (!_objectDetection())
     {
-#if defined (SPDLOG)
-      m_logger->warn("Detect objects failed ...");
-#endif
+
       ret = FAILURE;
     }
     // Object Tracking
     if (!_objectTracking())
     {
-#if defined (SPDLOG)
-      m_logger->warn("Track objects failed ...");
-#endif
+
       ret = FAILURE;
     }
+    end = clock();
+
+    track_take_time = ((double)(end-start))/CLOCKS_PER_SEC;
+    cout<<"--------------tracking takes time : "<<track_take_time<<"----------------"<<endl;
     // Show Results
     _showDetectionResults();
-#if defined (SPDLOG)
-    // Save Results to Debug Logs
-    if (m_dbg_saveLogs)
-    {
-      _saveDetectionResults();
-    }
-#endif
+
     //
     m_preparingNextDetection = false;
 
     if (m_estimateTime)
     {
       time_1 = std::chrono::high_resolution_clock::now();
-#if defined (SPDLOG)
-      m_logger->info("");
-      m_logger->info("Processing Time: \t{} ms", std::chrono::duration_cast<std::chrono::nanoseconds>(time_1 - time_0).count() / (1000.0 * 1000));
-#endif
+
     }
   }
   else
@@ -787,9 +720,9 @@ cv::Mat imFrame = m_yolov8->Get_img();
 //              Work Flow Functions
 // ============================================
 // Alister modified 2023-11-29
-bool VisionTracker::_modelInfernece(cv::Mat &imgFrame)
+bool VisionTracker::_modelInfernece()
 {
-  if (!m_yolov8->run(imgFrame))
+  if (!m_yolov8->run())
   {
     return FAILURE;
   }
@@ -879,9 +812,7 @@ bool VisionTracker::_modelInfernece(cv::Mat &imgFrame)
 //Original Code 2023-11-29
 bool VisionTracker::_objectDetection()
 {
-#if defined (SPDLOG)
-  auto m_logger = spdlog::get("VisionTracker");
-#endif
+
 
   m_yolov8->getHumanBoundingBox(
     m_humanBBoxList,
@@ -936,9 +867,7 @@ bool VisionTracker::_objectDetection()
 
 bool VisionTracker::_objectTracking()
 {
-#if defined (SPDLOG)
-  auto m_logger = spdlog::get("VisionTracker");
-#endif
+
   // Run Object Tracking
   m_humanTracker->run(m_img, m_humanBBoxList); //TODO:
   m_bikeTracker->run(m_img, m_bikeBBoxList); //TODO:
@@ -970,11 +899,7 @@ bool VisionTracker::_objectTracking()
     m_trackedObjList[i].updateSmoothBoundingBoxList();
   }
   printf("[bool VisionTracker::_objectTracking()] End updateSmoothBoundingBoxList\n");
-#if defined (SPDLOG)
-  // Debug Logs
-  m_logger->debug("Track: {} Human, {} Bike, {} Vehicle, {} Motorbike", \
-    (int)m_humanObjList.size(), (int)m_bikeObjList.size(), (int)m_vehicleObjList.size(), (int)m_motorbikeObjList.size());
-#endif
+
 
   return SUCCESS;
 }
@@ -1014,9 +939,7 @@ void VisionTracker::getResultImage(cv::Mat &imgResult)
 
 void VisionTracker::_showDetectionResults()
 {
-#if defined (SPDLOG)
-  auto m_logger = spdlog::get("VisionTracker");
-#endif
+
 
   // Show Tracked Object Information
   for (int i=0; i<m_trackedObjList.size(); i++)
@@ -1034,10 +957,7 @@ void VisionTracker::_showDetectionResults()
         classType = "Vehicle";
       else if (obj.bbox.label == MOTORBIKE)
         classType = "Motorbike";
-#if defined (SPDLOG)
-      // m_logger->info("Tracking Obj[{}]: Cls = {}, Conf = {:.2f}", \
-      //   obj.id, classType, obj.bbox.confidence);
-#endif
+
     }
   }
 }
@@ -1089,32 +1009,25 @@ void VisionTracker::_saveDetectionResults()
 
 void VisionTracker::_saveDrawResults()
 {
-#if defined (SPDLOG)
-  auto m_logger = spdlog::get("VisionTracker");
-#endif
+
   string imgName = "frame_" + std::to_string(m_frameIdx) + ".jpg";
-  // string imgPath = m_dbg_imgsDirPath + "/" + imgName;
-  string imgPath = "./AMBA_result/" + imgName;
-  printf("imgPath = %c\n",imgPath);
+  string imgPath = m_dbg_imgsDirPath + "/" + imgName;
+  // string imgPath = "/ali/yolov8/out2/" + imgName;
+  cout<<"imgPath : "<<imgPath<<endl;
   cv::imwrite(imgPath, m_dsp_imgResize);
-#if defined (SPDLOG)
-  m_logger->info("Save img to {}", imgPath);
-#endif
+  cout<<"Save tracking image done -------"<<endl;
+
 }
 
 
 void VisionTracker::_saveRawImages()
 {
-#if defined (SPDLOG)
-  auto m_logger = spdlog::get("VisionTracker");
-#endif
+
   string imgName = "frame_" + std::to_string(m_frameIdx) + ".jpg";
   string imgPath = m_dbg_rawImgsDirPath + "/" + imgName;
 
   cv::imwrite(imgPath, m_img);
-#if defined (SPDLOG)
-  m_logger->info("Save raw img to {}", imgPath);
-#endif
+
 }
 
 
@@ -1319,7 +1232,7 @@ void VisionTracker::_drawResults()
   {
     _drawTrackedObjects();
   }
- 
+
   cv::resize(m_dsp_img, m_dsp_imgResize, cv::Size(1024, 640), cv::INTER_LINEAR);
  
   if (m_dsp_information)

@@ -46,7 +46,7 @@ class VisionTracker
   //Below this run is for AMBA YOLOV8 Detection and Tracking
   bool run();
   // cv::Mat imFrame;
-  bool _modelInfernece(cv::Mat &imgFrame);
+  bool _modelInfernece();
   void getResults(VisionTrackingResults &result);
   void getResultImage(cv::Mat &imgResult);
   bool isFinishDetection() { return !m_preparingNextDetection; };
@@ -164,7 +164,7 @@ class VisionTracker
   bool m_dbg_objectDetection = true;
   bool m_dbg_objectTracking = true;
   bool m_dbg_saveLogs = false;
-  bool m_dbg_saveImages = true;
+  bool m_dbg_saveImages = false;
   bool m_dbg_saveRawImages = false;
   std::string m_dbg_logsDirPath = "";
   std::string m_dbg_imgsDirPath = "";

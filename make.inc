@@ -89,15 +89,33 @@ ifeq ($(BUILD_AMBARELLA_EAZYAI_UNIT_TEST), y)
 include $(CLEAR_VARS)
 LUA_DIR		:= $(LOCAL_PATH)/resource/lua
 
-LOCAL_TARGET	:= test_eazyai
-LOCAL_SRCS	:= $(LOCAL_PATH)/test_eazyai.c \
+OPENCV_PATH	:= $(PREBUILD_OSS_DIR)/opencv
+LOCAL_CFLAGS += -I$(OPENCV_PATH)/include/opencv4
+
+LOCAL_TARGET	:= test_yolov8
+LOCAL_SRCS	:= $(LOCAL_PATH)/test_yolov8.cpp \
 		$(LOCAL_PATH)/nn_cvflow_task/nn_cvflow.c \
 		$(LOCAL_PATH)/nn_thread/post_thread.c
 
 LOCAL_SRCS	+= $(LOCAL_PATH)/nn_input/nn_input.c \
 		$(LOCAL_PATH)/nn_input/iav_input.c \
 		$(LOCAL_PATH)/nn_input/file_input.c \
-		$(LOCAL_PATH)/nn_input/dummy_input.c
+		$(LOCAL_PATH)/nn_input/dummy_input.c \
+		$(LOCAL_PATH)/yolov8_utils/bounding_box.c \
+		$(LOCAL_PATH)/yolov8_utils/config_reader.c \
+		$(LOCAL_PATH)/yolov8_utils/dla_config.c \
+		$(LOCAL_PATH)/yolov8_utils/gms_matcher.c \
+		$(LOCAL_PATH)/yolov8_utils/img_util.c \
+		$(LOCAL_PATH)/yolov8_utils/logger.c \
+		$(LOCAL_PATH)/yolov8_utils/matching2D.c \
+		$(LOCAL_PATH)/yolov8_utils/object.c \
+		$(LOCAL_PATH)/yolov8_utils/object_tracker.c \
+		$(LOCAL_PATH)/yolov8_utils/point.c \
+		$(LOCAL_PATH)/yolov8_utils/trajectory.c \
+		$(LOCAL_PATH)/yolov8_utils/utils.c \
+		$(LOCAL_PATH)/yolov8_utils/vision_tracker.c \
+		$(LOCAL_PATH)/yolov8_utils/yolov8_class.c
+		
 
 LOCAL_CFLAGS 	+= -I$(AMB_TOPDIR)/packages/eazyai/inc \
 		-I$(LOCAL_PATH)/nn_cvflow_task \
@@ -113,7 +131,7 @@ LOCAL_LDFLAGS   := -L$(PREBUILD_OSS_DIR)/lua/usr/lib -llua
 LOCAL_LIBS		:= libeazyai.so libeazyai_utils.so libeazyai_comm.so libeazyai_arm_postprocess.so
 
 OPENCV_PATH		:= $(PREBUILD_OSS_DIR)/opencv
-LOCAL_LDFLAGS	+= -lpthread -lopencv_core -lopencv_imgproc -lopencv_imgcodecs \
+LOCAL_LDFLAGS	+= -lpthread -lopencv_core -lopencv_imgproc -lopencv_imgcodecs -lopencv_features2d \
 	-L$(OPENCV_PATH)/usr/lib \
 	-Wl,-rpath-link=$(FAKEROOT_DIR)/usr/lib \
 	-Wl,-rpath-link=$(OPENCV_PATH)/usr/lib \
