@@ -117,12 +117,12 @@ typedef struct
 // }
 // return _nn_arm_nms_config_
 
-// AMBa lua config , Alister add 2023-12-11
+// AMBA lua config , Alister add 2023-12-11
 typedef struct
 {
-  float conf_threshold;
+  std::string conf_threshold;
   int top_k;
-  float nms_threshold;
+  std::string nms_threshold;
   int class_num;
   int enable_seg;
   int log_level;

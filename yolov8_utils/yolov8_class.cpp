@@ -26,7 +26,8 @@ YoloV8_Class::YoloV8_Class(Config_S *config,int argc, char **argv)
   live_ctx = new live_ctx_t;
 
   cout<<"Start AMBA init_param"<<endl;
-  rval = init_param(argc, argv, params);
+  rval = init_param(argc, argv, params, config); // 2023-12-11 Alister add
+  // rval = init_param(argc, argv, params);
   cout<<"End AMBA init_param"<<endl;
   cout<<"Start AMBA live_init"<<endl;
   rval = live_init(live_ctx, params);
@@ -487,6 +488,12 @@ int YoloV8_Class::init_param(int argc, char **argv, live_params_t *params, Confi
 	params->draw_mode = config->AMBAInitParamConfig.draw_mode;
 	params->rgb = config->AMBAInitParamConfig.input_color_type;
 
+	// params->mode = RUN_LIVE_MODE;
+	// params->log_level = EA_LOG_LEVEL_NOTICE;
+	// params->draw_mode = DRAW_BBOX_TEXTBOX;
+	// params->rgb = BGR_PLANAR;
+
+
 	params->yuv_flag = IN_SRC_OFF;
 	params->use_pyramid = IN_SRC_OFF;
 	params->enable_fsync_flag = IN_SRC_ON;
@@ -499,6 +506,11 @@ int YoloV8_Class::init_param(int argc, char **argv, live_params_t *params, Confi
 	params->thread_num = config->AMBAInitParamConfig.thread_num;
 	params->acinf_gpu_id = config->AMBAInitParamConfig.acinf_gpu_id;
 	params->overlay_buffer_offset = config->AMBAInitParamConfig.overlay_buffer_offset;
+	// params->queue_size = 1;
+	// params->thread_num = 1;
+	// params->acinf_gpu_id = -1;
+	// params->overlay_buffer_offset = -1;
+
 
 	do {
 		if (argc < 2) {

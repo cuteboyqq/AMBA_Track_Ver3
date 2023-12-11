@@ -70,7 +70,7 @@ bool TrackerConfigReader::read(std::string configPath)
     string runtime = "";      // For QCS6490
 
     // Alister add 2023-12-10
-    // lua file settings
+    // AMBA Lua File Settings
     string conf_threshold ="";
     int top_k = 200;
     string nms_threshold ="";
@@ -79,6 +79,18 @@ bool TrackerConfigReader::read(std::string configPath)
     int log_level = 2;
     int disable_fsync = 0;
     std::string output = "output_0";
+
+    // AMBA Init Param Setting
+    int mode = 1;
+    int draw_mode = 0;
+    int input_color_type = 0;
+    int yuv_flag = 0;
+    int use_pyramid = 0;
+    int enable_fsync_flag = 1;
+    int queue_size = 1;
+    int thread_num = 1;
+    int acinf_gpu_id = -1;
+    int overlay_buffer_offset = -1;
 
     // Model Information
     string modelPath = "";
@@ -155,7 +167,7 @@ bool TrackerConfigReader::read(std::string configPath)
 // return _nn_arm_nms_config_
 
 
-    //lua file settings Alister add 2023-12-10
+    //AMBA lua file settings Alister add 2023-12-10
     configReader->getValue("ConfThreshold",conf_threshold);
     configReader->getValue("TopK", top_k);
     configReader->getValue("NMSThreshold", nms_threshold);
@@ -164,6 +176,18 @@ bool TrackerConfigReader::read(std::string configPath)
     configReader->getValue("LogLevel", log_level);
     configReader->getValue("DisableFsync", disable_fsync);
     configReader->getValue("Output", output);
+
+    //AMBA init param settings Alister add 2023-12-11
+    configReader->getValue("Mode",mode);
+    configReader->getValue("DrawMode",draw_mode);
+    configReader->getValue("InputColorType",input_color_type);
+    configReader->getValue("UsePyramid",use_pyramid);
+    configReader->getValue("EnableFsyncFlag",enable_fsync_flag);
+    configReader->getValue("QueueSize",queue_size);
+    configReader->getValue("ThreadNum",thread_num);
+    configReader->getValue("AcinfGpuId",acinf_gpu_id);
+    configReader->getValue("OverlayBufferOffset",overlay_buffer_offset);
+
 
 
 
@@ -322,6 +346,28 @@ bool TrackerConfigReader::read(std::string configPath)
     m_config->modelPath = modelPath;
     m_config->modelWidth = modelWidth;
     m_config->modelHeight = modelHeight;
+    
+    // AMBA lua file info (Alister add 2023-12-11)
+    m_config->AMBALuaConfig.class_num = class_num;
+    m_config->AMBALuaConfig.conf_threshold = conf_threshold;
+    m_config->AMBALuaConfig.disable_fsync = disable_fsync;
+    m_config->AMBALuaConfig.enable_seg = enable_seg;
+    m_config->AMBALuaConfig.log_level = log_level;
+    m_config->AMBALuaConfig.nms_threshold = nms_threshold;
+    m_config->AMBALuaConfig.output_0 = output;
+    m_config->AMBALuaConfig.top_k = top_k;
+
+    // AMBA init parameter setting (Alister add 2023-12-11)
+    m_config->AMBAInitParamConfig.acinf_gpu_id = acinf_gpu_id;
+    m_config->AMBAInitParamConfig.draw_mode = draw_mode;
+    m_config->AMBAInitParamConfig.enable_fsync_flag = enable_fsync_flag;
+    m_config->AMBAInitParamConfig.input_color_type = input_color_type;
+    m_config->AMBAInitParamConfig.mode = mode;
+    m_config->AMBAInitParamConfig.overlay_buffer_offset = overlay_buffer_offset;
+    m_config->AMBAInitParamConfig.queue_size = queue_size;
+    m_config->AMBAInitParamConfig.thread_num = thread_num;
+    m_config->AMBAInitParamConfig.use_pyramid = use_pyramid;
+    m_config->AMBAInitParamConfig.yuv_flag = yuv_flag;
 
     // Camera Information
     m_config->stCameraConfig.height = std::stof(cameraHeight);
