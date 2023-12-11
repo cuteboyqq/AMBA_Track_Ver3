@@ -147,6 +147,20 @@ typedef struct
 
 } AMBA_Init_Param_Config;
 
+// AMBA Command parameter settings
+typedef struct
+{
+  std::string multi_images;
+  std::string lua_file_path;
+  std::string label_path;
+  std::string output_dir;
+  int class_num;
+  std::string model;
+
+} AMBA_Command_Param_Config;
+
+
+
 typedef struct
 {
   std::string runtime;        // QCS6490
@@ -177,6 +191,9 @@ typedef struct
 
   // AMBA Init Param Config (Alister add 2023-12-11)
   AMBA_Init_Param_Config AMBAInitParamConfig;
+
+  // AMBA Command Param Config (Alister add 2023-12-11)
+  AMBA_Command_Param_Config AMBACommandParamConfig;
 
   //lua file setting
   float conf_threshold;

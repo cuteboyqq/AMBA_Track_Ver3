@@ -92,6 +92,14 @@ bool TrackerConfigReader::read(std::string configPath)
     int acinf_gpu_id = -1;
     int overlay_buffer_offset = -1;
 
+    // AMBA Command Param Setting
+    string multi_images = "";
+    string lua_file_path = "";
+    string label_path = "";
+    string output_dir = "";
+    string model = "yolov8";
+    // char model_path = "";
+
     // Model Information
     string modelPath = "";
     int modelWidth = 0;
@@ -188,8 +196,13 @@ bool TrackerConfigReader::read(std::string configPath)
     configReader->getValue("AcinfGpuId",acinf_gpu_id);
     configReader->getValue("OverlayBufferOffset",overlay_buffer_offset);
 
-
-
+    //AMBA command param setting Alister add 2023-12-11
+    configReader->getValue("MultiImages",multi_images);
+    configReader->getValue("LuafilePath",lua_file_path);
+    configReader->getValue("LabelPath",label_path);
+    configReader->getValue("Model",model);
+    configReader->getValue("ClassNum",class_num);
+    configReader->getValue("OutputDirPath",output_dir);
 
     // Model Information
     configReader->getValue("ModelPath", modelPath);
@@ -249,94 +262,7 @@ bool TrackerConfigReader::read(std::string configPath)
     configReader->getValue("ShowProcTimeYOLOv8", showProcTimeYolov8);
     configReader->getValue("ShowProcTimeObjectTracking", showProcTimeObjectTracking);
 
-#if defined (SPDLOG)
-    // Variables has been updated. Print them on the console.
-    if (debugConfig)
-    {
-      m_logger->info("-------------------------------------------------");
-      m_logger->info("[Platform Runtime Information]");
-      m_logger->info("-------------------------------------------------");
-      m_logger->info("Runtime \t\t= {}", runtime);
 
-      m_logger->info("-------------------------------------------------");
-      m_logger->info("[Model Information]");
-      m_logger->info("-------------------------------------------------");
-      m_logger->info("ModelPath \t\t= {}", modelPath);
-      m_logger->info("ModelWidth \t\t= {}", modelWidth);
-      m_logger->info("ModelHeight \t\t= {}", modelHeight);
-
-      m_logger->info("-------------------------------------------------");
-      m_logger->info("[Camera Information]");
-      m_logger->info("-------------------------------------------------");
-      m_logger->info("CameraHeight \t= {}", cameraHeight);
-      m_logger->info("CameraFocalLength \t= {}", cameraFocalLength);
-      m_logger->info("FrameWidth \t\t= {}", frameWidth);
-      m_logger->info("FrameHeight \t\t= {}", frameHeight);
-
-      m_logger->info("-------------------------------------------------");
-      m_logger->info("[Processing Time]");
-      m_logger->info("-------------------------------------------------");
-      m_logger->info("ProcessingFrameRate \t= {}", procFrameRate);
-      m_logger->info("ProcessingFrameStep \t= {}", procFrameStep);
-
-      m_logger->info("-------------------------------------------------");
-      m_logger->info("[Object Detection]");
-      m_logger->info("-------------------------------------------------");
-      m_logger->info("MaxDetection \t= {}", maxDetection);
-      m_logger->info("DetectionRange \t= {}", detectionRange);
-      m_logger->info("RemoveOverlap \t= {}", removeOverlap);
-      m_logger->info("HumanConfidence \t= {}", humanConfidence);
-      m_logger->info("BikeConfidence \t= {}", bikeConfidence);
-      m_logger->info("CarConfidence \t= {}", carConfidence);
-      m_logger->info("MotorbikeConfidence \t= {}", motorbikeConfidence);
-
-      m_logger->info("-------------------------------------------------");
-      m_logger->info("[Object Tracking]");
-      m_logger->info("-------------------------------------------------");
-      m_logger->info("MaxTracking \t\t= {}", maxTracking);
-      m_logger->info("MatchingLevel \t= {}", matchingLevel);
-
-      // Debug Information
-      m_logger->info("-------------------------------------------------");
-      m_logger->info("[Debug Information]");
-      m_logger->info("-------------------------------------------------");
-      m_logger->info("Config \t\t= {}", debugConfig);
-      m_logger->info("Tracking \t\t= {}", debugTracking);
-      m_logger->info("Yolov8 \t\t= {}", debugYolov8);
-      m_logger->info("ObjectDetection \t= {}", debugObjectDetection);
-      m_logger->info("ObjectTracking \t= {}", debugObjectTracking);
-      m_logger->info("HumanTracker \t= {}", debugHumanTracker);
-      m_logger->info("RiderTracker \t= {}", debugBikeTracker);
-      m_logger->info("VehicleTracker \t= {}", debugVehicleTracker);
-      m_logger->info("MotorbikeTracker \t= {}", debugMotorbikeTracker);
-      m_logger->info("DebugSaveLogs \t= {}", debugSaveLogs);
-      m_logger->info("DebugSaveImages \t= {}", debugSaveImages);
-      m_logger->info("DebugSaveRawImages \t= {}", debugSaveRawImages);
-      m_logger->info("DebugLogsDirPath \t= {}", debugLogsDirPath);
-      m_logger->info("DebugImagesDirPath \t= {}", debugImagesDirPath);
-      m_logger->info("DebugRawImagesDirPath \t= {}", debugRawImagesDirPath);
-
-      // Display Results
-      m_logger->info("-------------------------------------------------");
-      m_logger->info("[Display Information]");
-      m_logger->info("-------------------------------------------------");
-      m_logger->info("Results \t\t= {}", displayResults);
-      m_logger->info("ObjectDetection \t= {}", displayObjectDetection);
-      m_logger->info("ObjectTracking \t= {}", displayObjectTracking);
-      m_logger->info("ForwardCollision \t= {}", displayWarningZone);
-      m_logger->info("Information \t\t= {}", displayInformation);
-      m_logger->info("MaxFrameIndex \t= {}", displayMaxFrameIndex);
-
-      // Show Processing Time Information
-      m_logger->info("-------------------------------------------------");
-      m_logger->info("[Show Processing Time Information]");
-      m_logger->info("-------------------------------------------------");
-      m_logger->info("Tracking \t\t= {}", showProcTimeTracking);
-      m_logger->info("Yolov8 \t\t= {}", showProcTimeYolov8);
-      m_logger->info("ObjectTracking \t= {}", showProcTimeObjectTracking);
-      m_logger->info("=================================================");
-    }
-#endif
     // Pass configuration
 
     // Platform Runtime
@@ -368,6 +294,14 @@ bool TrackerConfigReader::read(std::string configPath)
     m_config->AMBAInitParamConfig.thread_num = thread_num;
     m_config->AMBAInitParamConfig.use_pyramid = use_pyramid;
     m_config->AMBAInitParamConfig.yuv_flag = yuv_flag;
+
+    //AMBA command parameter setting (Alister add 2023-12-11)
+    m_config->AMBACommandParamConfig.label_path = label_path;
+    m_config->AMBACommandParamConfig.lua_file_path = lua_file_path;
+    m_config->AMBACommandParamConfig.multi_images = multi_images;
+    m_config->AMBACommandParamConfig.model = model;
+    m_config->AMBACommandParamConfig.output_dir = output_dir;
+    m_config->AMBACommandParamConfig.class_num = class_num;
 
     // Camera Information
     m_config->stCameraConfig.height = std::stof(cameraHeight);

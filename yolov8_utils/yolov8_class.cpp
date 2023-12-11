@@ -511,6 +511,15 @@ int YoloV8_Class::init_param(int argc, char **argv, live_params_t *params, Confi
 	// params->acinf_gpu_id = -1;
 	// params->overlay_buffer_offset = -1;
 
+	// AMBA Command Parameter settings (use char *cstr = &str[0] to conver string into char *)
+	params->label_path = &(config->AMBACommandParamConfig.label_path)[0];
+	params->model_path = &(config->modelPath)[0];
+	params->lua_file_path = &(config->AMBACommandParamConfig.lua_file_path)[0];
+	params->class_num = config->AMBACommandParamConfig.class_num;
+	params->arm_nn_name = &(config->AMBACommandParamConfig.model)[0];
+	strcpy(params->output_dir,(config->AMBACommandParamConfig.output_dir).c_str());
+	// strcpy(params->multi_in_params[0],(config->AMBACommandParamConfig.multi_images).c_str());
+
 
 	do {
 		if (argc < 2) {
