@@ -721,12 +721,13 @@ double track_take_time;
 // ============================================
 // Alister modified 2023-11-29
 bool VisionTracker::_modelInfernece()
-{
+{ 
+  cout<<"In [_modelInfernece]"<<endl;
   if (!m_yolov8->run())
   {
     return FAILURE;
   }
-
+  cout<<"Leave [_modelInfernece]"<<endl;
   return SUCCESS;
 }
 // bool VisionTracker::_modelInfernece(std::vector<BoundingBox> bboxList)
@@ -812,7 +813,7 @@ bool VisionTracker::_modelInfernece()
 //Original Code 2023-11-29
 bool VisionTracker::_objectDetection()
 {
-
+  cout<<"In [_objectDetection]"<<endl;
 
   m_yolov8->getHumanBoundingBox(
     m_humanBBoxList,
@@ -846,6 +847,8 @@ bool VisionTracker::_objectDetection()
     *m_roi
   );
 
+  cout<<"Leave [_objectDetection]"<<endl;
+
 #if defined (SPDLOG)
   // Debug Logs
   m_logger->debug("Num of Human Bounding Box: {}",\
@@ -867,40 +870,59 @@ bool VisionTracker::_objectDetection()
 
 bool VisionTracker::_objectTracking()
 {
-
+  cout<<"in [_objectTracking]"<<endl;
   // Run Object Tracking
+  cout<<"Start run-------------------"<<endl;
+
+  cout<<"start human"<<endl;
   m_humanTracker->run(m_img, m_humanBBoxList); //TODO:
+  cout<<"end human"<<endl;
+
+  cout<<"start bike"<<endl;
   m_bikeTracker->run(m_img, m_bikeBBoxList); //TODO:
+  cout<<"end bike"<<endl;
+
+  cout<<"start vehicle"<<endl;
   m_vehicleTracker->run(m_img, m_vehicleBBoxList); //TODO:
+  cout<<"end vehicle"<<endl;
+
+  cout<<"start motorbike"<<endl;
   m_motorbikeTracker->run(m_img, m_motorbikeBBoxList); //TODO:
- 
+  cout<<"end motorbike"<<endl;
+
+  cout<<"End run---------------------"<<endl;
   // Get Tracked Objects
+  cout<<"Start getObjectList"<<endl;
   m_humanTracker->getObjectList(m_humanObjList);
   m_bikeTracker->getObjectList(m_bikeObjList);
   m_vehicleTracker->getObjectList(m_vehicleObjList);
   m_motorbikeTracker->getObjectList(m_motorbikeObjList);
- 
+  cout<<"End getObjectList"<<endl;
   // Get Location of Tracked Objects
+  cout<<"Start getTrackedObjList"<<endl;
   m_humanTracker->getTrackedObjList(m_humanTrackObjList);
   m_bikeTracker->getTrackedObjList(m_bikeTrackObjList);
   m_vehicleTracker->getTrackedObjList(m_vehicleTrackObjList);
   m_motorbikeTracker->getTrackedObjList(m_motorbikeTrackObjList);
-  
+  cout<<"End getTrackedObjList"<<endl;
   // Merge Tracked Objects
+  cout<<"Start Merge Tracked Objects"<<endl;
   m_trackedObjList.clear();
   m_trackedObjList.insert(m_trackedObjList.end(), m_humanObjList.begin(), m_humanObjList.end());
   m_trackedObjList.insert(m_trackedObjList.end(), m_bikeObjList.begin(), m_bikeObjList.end());
   m_trackedObjList.insert(m_trackedObjList.end(), m_vehicleObjList.begin(), m_vehicleObjList.end());
   m_trackedObjList.insert(m_trackedObjList.end(), m_motorbikeObjList.begin(), m_motorbikeObjList.end());
-   
+  cout<<"End Merge Tracked Objects"<<endl;
   // Bounding Box Smoothing
+  cout<<"Start updateSmoothBoundingBoxList"<<endl;
   for (int i=0; i<m_trackedObjList.size(); i++)
   {
     m_trackedObjList[i].updateSmoothBoundingBoxList();
   }
+  cout<<"End updateSmoothBoundingBoxList"<<endl;
   printf("[bool VisionTracker::_objectTracking()] End updateSmoothBoundingBoxList\n");
 
-
+  cout<<"End [_objectTracking]"<<endl;
   return SUCCESS;
 }
 
@@ -1081,7 +1103,7 @@ void VisionTracker::_drawBoundingBoxes()
 
 void VisionTracker::_drawTrackedObjects()
 {
- 
+  cout<<"In [_drawTrackedObjects]"<<endl;
   for (int i = 0; i < m_trackedObjList.size(); i++)
   {
     const Object& trackedObj = m_trackedObjList[i];
@@ -1115,6 +1137,13 @@ void VisionTracker::_drawTrackedObjects()
       lastBox, rescaleBox,
       m_config->modelWidth, m_config->modelHeight,
       m_config->frameWidth, m_config->frameHeight);
+
+    cout<<"In Func : _drawTrackedObjects : "<<endl;
+    cout<<"rescaleBox.x1:"<<rescaleBox.x1<<endl;
+    cout<<"rescaleBox.y1:"<<rescaleBox.y1<<endl;
+    cout<<"rescaleBox.x2:"<<rescaleBox.x2<<endl;
+    cout<<"rescaleBox.y2:"<<rescaleBox.y2<<endl;
+
 
     if (trackedObj.aliveCounter < 3)
     {
@@ -1179,6 +1208,7 @@ void VisionTracker::_drawTrackedObjects()
       cv::FONT_HERSHEY_DUPLEX, 2.0,
       cv::Scalar(255, 255, 255), 2, 5, 0);
   }
+  cout<<"End [_drawTrackedObjects]"<<endl;
 }
 
 

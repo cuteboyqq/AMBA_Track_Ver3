@@ -530,9 +530,15 @@ namespace utils
     BoundingBox &bbox, BoundingBox &rescaleBBox,
     int modelWidth, int modelHeight, int videoWidth, int videoHeight)
   {
+    cout<<"in rescaleBBox-----------------"<<endl;
+    cout<<"modelWidth = "<<modelWidth<<endl;
+    cout<<"modelHeight = "<<modelHeight<<endl;
+    cout<<"videoWidth = "<<videoWidth<<endl;
+    cout<<"videoHeight = "<<videoHeight<<endl;
     float w_ratio = (float)modelWidth / (float)videoWidth;
     float h_ratio = (float)modelHeight / (float)videoHeight;
-  
+    cout<<"w_ratio = "<<w_ratio<<endl;
+    cout<<"h_ratio = "<<h_ratio<<endl;
     rescaleBBox.x1 = (int)((float)bbox.x1 / w_ratio);
     rescaleBBox.y1 = (int)((float)bbox.y1 / h_ratio);
     rescaleBBox.x2 = (int)((float)bbox.x2 / w_ratio);
@@ -547,6 +553,13 @@ namespace utils
       rescaleBBox.y1 = 0;
     if (rescaleBBox.y2 > videoHeight-1)
       rescaleBBox.y2 = videoHeight-1;
+   
+    rescaleBBox.confidence = bbox.confidence;
+    cout<<"rescaleBBox.x1 = "<<rescaleBBox.x1<<endl;
+    cout<<"rescaleBBox.y1 = "<<rescaleBBox.y1<<endl;
+    cout<<"rescaleBBox.x2 = "<<rescaleBBox.x2<<endl;
+    cout<<"rescaleBBox.y2 = "<<rescaleBBox.y2<<endl;
+    cout<<"rescaleBBox.confidence = "<<rescaleBBox.confidence<<endl;
   }
 
 

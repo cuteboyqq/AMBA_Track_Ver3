@@ -775,7 +775,7 @@ void YoloV8_Class::yolov8_thread_join()
 
 cv::Mat YoloV8_Class::Get_img()
 {
-	cv::Mat bgr = cv::Mat::zeros(1920,1080,CV_8UC3);
+	cv::Mat bgr = cv::Mat::zeros(1920,1080,CV_8UC3); //rows,cols
 	int rval;
 	// pthread_mutex_t mutex = PTHREAD_MUTEX_INITIALIZER;
 	cout<<"Start if(live_ctx->thread_ctx.thread->nn_arm_ctx.bgr!=NULL)"<<endl;
@@ -792,6 +792,7 @@ cv::Mat YoloV8_Class::Get_img()
 	}
 	else
 	{	
+		// bgr = cv::Mat::zeros(1920,1080,CV_8UC3);
 		bgr = cv::Mat::zeros(1920,1080,CV_8UC3);
 	}
 
@@ -909,7 +910,7 @@ int YoloV8_Class::Get_Yolov8_Bounding_Boxes_Ver2(v8xyxy bboxList[MAX_YOLO_BBX], 
 			// float x2 = float(yolov8_result->bbox[i].x_end);
 			// float y2 = float(yolov8_result->bbox[i].y_end);
 			// cout<<"[Get_Yolov8_Bounding_Boxes] x1:"<<x1<<" y1:"<<y1<<" x2:"<<x2<<" y2:"<<y2<<endl;
-			if(x1!=0 && x2!=0 && y1!=0 && y2!=0)
+			if(x1>0 && x2>0 && y1>0 && y2>0 && x1<x2 && y1<y2 && x1<400 && y1<400 && x2<400 && y2<400)
 			{	
 				struct v8xyxy bb;
 				 	bb.x1 = x1;

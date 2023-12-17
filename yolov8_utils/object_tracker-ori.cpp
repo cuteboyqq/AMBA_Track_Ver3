@@ -263,18 +263,29 @@ void ObjectTracker::run(cv::Mat &img, vector<BoundingBox> &bboxList)
     m_logger->info("-----------------------------------------");
   }
 #endif
-
+  cout<<"Start _setCurrBoundingBox"<<endl;
   _setCurrBoundingBox(bboxList);
+  cout<<"End _setCurrBoundingBox"<<endl;
 
+  cout<<"Start _updateFrameStamp"<<endl;
   _updateFrameStamp();
+  cout<<"End _updateFrameStamp"<<endl;
 
+  cout<<"Start _setCurrFrame"<<endl;
   _setCurrFrame(img);
+  cout<<"End _setCurrFrame"<<endl;
 
+  cout<<"Start _updateCurrObjectList"<<endl;
   _updateCurrObjectList();
+  cout<<"End _updateCurrObjectList"<<endl;
 
+  cout<<"Start _updateTrackingObject"<<endl;
   _updateTrackingObject();
+  cout<<"End _updateTrackingObject"<<endl;
 
+  cout<<"Start _filterOverlapObject"<<endl;
   _filterOverlapObject();
+  cout<<"End _filterOverlapObject"<<endl;
 
 #if defined (SPDLOG)
   if (m_estimateTime)

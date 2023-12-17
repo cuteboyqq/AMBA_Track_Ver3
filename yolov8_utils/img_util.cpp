@@ -610,26 +610,56 @@ namespace imgUtil
   //
   void cropImages(cv::Mat &img, cv::Mat &imgCrop, BoundingBox &box)
   {
+    cout<<"in cropImages---------------"<<endl;
     int w = 0;
     int h = 0;
 
     if (box.x1 < 0)
         box.x1 = 0;
-    else if (box.x2 > img.cols)
-        box.x2 = img.cols;
+    if (box.x2 > img.cols)
+        box.x2 = img.cols - 1;
 
     if (box.y1 < 0)
         box.y1 = 0;
-    else if (box.y2 > img.rows)
-        box.y2 = img.rows;
+    if (box.y2 > img.rows)
+        box.y2 = img.rows - 1;
 
     w = abs(box.x2 - box.x1);
     h = abs(box.y2 - box.y1);
-    // cout<<"[cropImages]box.x1 = "<<box.x1<<endl;
-    // cout<<"[cropImages]box.y1 = "<<box.y1<<endl;
-    // cout<<"[cropImages]w = "<<w<<endl;
-    // cout<<"[cropImages]h = "<<h<<endl;
+
+    // if ((box.x1 + w) < img.rows)
+    // {
+    //   w = abs(box.x2 - box.x1);
+    // }
+    // else{
+    //    w = img.rows - box.x1 - 1;
+    // }
+
+    // if ((box.y1 + h) < img.cols)
+    // {
+    //  h = abs(box.y2 - box.y1);
+    // }
+    // else{
+    //   h = img.cols - 1;
+    // }
+
+
+    cout<<"[img]img.rows = "<<img.rows<<endl;
+    cout<<"[img]img.cols = "<<img.cols<<endl;
+
+    cout<<"[cropImages]box.x1 = "<<box.x1<<endl;
+    cout<<"[cropImages]box.y1 = "<<box.y1<<endl;
+    cout<<"[cropImages]w = "<<w<<endl;
+    cout<<"[cropImages]h = "<<h<<endl;
+
+    cout<<"Start Get roi(box.x1, box.y1, w, h)"<<endl;
     cv::Rect roi(box.x1, box.y1, w, h);
+    cout<<"End Get roi(box.x1, box.y1, w, h)"<<endl;
+
+    cout<<"Start imgCrop = img(roi)"<<endl;
     imgCrop = img(roi);
+    // imgCrop = img;
+    cout<<"End imgCrop = img(roi)"<<endl;
+    cout<<"end cropImages---------------"<<endl;
   }
 }

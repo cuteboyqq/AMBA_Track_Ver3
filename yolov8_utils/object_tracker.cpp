@@ -258,17 +258,43 @@ void ObjectTracker::run(cv::Mat &img, vector<BoundingBox> &bboxList)
   }
 #endif
 
+  cout<<"Start _setCurrBoundingBox"<<endl;
   _setCurrBoundingBox(bboxList);
- 
+  cout<<"End _setCurrBoundingBox"<<endl;
+
+  cout<<"Start _updateFrameStamp"<<endl;
   _updateFrameStamp();
-  
+  cout<<"End _updateFrameStamp"<<endl;
+
+  cout<<"Start _setCurrFrame"<<endl;
   _setCurrFrame(img);
-  
+  cout<<"End _setCurrFrame"<<endl;
+
+  cout<<"Start _updateCurrObjectList"<<endl;
   _updateCurrObjectList();
-  
+  cout<<"End _updateCurrObjectList"<<endl;
+
+  cout<<"Start _updateTrackingObject"<<endl;
   _updateTrackingObject();
-  
+  cout<<"End _updateTrackingObject"<<endl;
+
+  cout<<"Start _filterOverlapObject"<<endl;
   _filterOverlapObject();
+  cout<<"End _filterOverlapObject"<<endl;
+
+
+
+  // _setCurrBoundingBox(bboxList);
+ 
+  // _updateFrameStamp();
+  
+  // _setCurrFrame(img);
+  
+  // _updateCurrObjectList();
+  
+  // _updateTrackingObject();
+  
+  // _filterOverlapObject();
   
  
 
@@ -496,9 +522,10 @@ int ObjectTracker::_updateCurrObjectList() //TODO: refactor?
       }
     }
     else if (m_task == TRACK_HUMAN)
-    {
+    { 
       if (_isValidHumanBBox(bbox))
-      {
+      { 
+        cout<<"start human part~~~~~~~~~"<<endl;
         Point pCenter = bbox.getCenterPoint();
 
         Object *ptrObj = &m_currObjList[objIdx];
@@ -509,19 +536,23 @@ int ObjectTracker::_updateCurrObjectList() //TODO: refactor?
 
         // Appearance Features
         BoundingBox rescaleBBox(-1, -1, -1, -1, m_bboxList[i].label);
+        cout<<" start rescaleBBox"<<endl;
         utils::rescaleBBox(
           m_bboxList[i], rescaleBBox, m_modelWidth, m_modelHeight, m_videoWidth, m_videoHeight);
-
+        cout<<" End rescaleBBox"<<endl;
         cv::Mat imgCrop;
+        cout<<" Start cropImages"<<endl;
         imgUtil::cropImages(m_img, imgCrop, rescaleBBox);
-
+        cout<<" end cropImages"<<endl;
         // Get Keypoints and Descriptors
         cv::Mat imgGray;
         vector<cv::KeyPoint> kpt;
+        cout<<" Start cvtColor"<<endl;
         cv::cvtColor(imgCrop, imgGray, cv::COLOR_BGR2GRAY);
+        cout<<" End cvtColor"<<endl;
         _calcKeypoint(imgGray, kpt);
         ptrObj->updateKeypoint(kpt);
-
+        cout<<"end human part~~~~~~~~~"<<endl;
         // // Trajectory
         // vector<Point> tmpTrajectoryList;
         // Point pLocation = m_trajectory->bboxToPointSimple(bbox);
