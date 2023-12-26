@@ -30,7 +30,8 @@ std::vector<std::string> getInputFileList(const char* filePath)
 
 
 void showTrackedHumanResults(std::vector<TrackedObj>& objList)
-{
+{	cout<<"In [test_yolov8.cpp] [showTrackedHumanResults]"<<endl;
+	cout<<"objList.size()"<<objList.size()<<endl;
 	for (int i=0; i<objList.size(); i++)
   {
     TrackedObj& obj = objList[i];
@@ -40,6 +41,7 @@ void showTrackedHumanResults(std::vector<TrackedObj>& objList)
     cout << "Conf: " << obj.confidence << " ";
     cout << "Loc: (" << obj.pLoc.x << " m, " << obj.pLoc.y << " m, " << obj.pLoc.z << " m)" << endl;
   }
+  cout<<"Out [test_yolov8.cpp] [showTrackedHumanResults]"<<endl;
 }
 
 bool fileExists(const std::string& path) {

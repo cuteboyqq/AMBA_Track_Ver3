@@ -1,0 +1,202 @@
+##
+## eazyai/unit_test/AmbaConfig
+##
+## History:
+##	2022/08/05 - [Yang Cao]
+##
+## Copyright (c) 2022 Ambarella International LP
+##
+## This file and its contents ("Software") are protected by intellectual
+## property rights including, without limitation, U.S. and/or foreign
+## copyrights. This Software is also the confidential and proprietary
+## information of Ambarella International LP and its licensors. You may not use, reproduce,
+## disclose, distribute, modify, or otherwise prepare derivative works of this
+## Software or any portion thereof except pursuant to a signed license agreement
+## or nondisclosure agreement with Ambarella International LP or its authorized affiliates.
+## In the absence of such an agreement, you agree to promptly notify and return
+## this Software to Ambarella International LP.
+##
+## This file includes sample code and is only for internal testing and evaluation.  If you
+## distribute this sample code (whether in source, object, or binary code form), it will be
+## without any warranty or indemnity protection from Ambarella International LP or its affiliates.
+##
+## THIS SOFTWARE IS PROVIDED "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES,
+## INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF NON-INFRINGEMENT,
+## MERCHANTABILITY, AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED.
+## IN NO EVENT SHALL AMBARELLA INTERNATIONAL LP OR ITS AFFILIATES BE LIABLE FOR ANY DIRECT,
+## INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
+## (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
+## LOSS OF USE, DATA, OR PROFITS; COMPUTER FAILURE OR MALFUNCTION; OR BUSINESS
+## INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN
+## CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
+## ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
+## POSSIBILITY OF SUCH DAMAGE.
+##
+
+
+config BUILD_AMBARELLA_EAZYAI_QUICK_IPC_SCRIPTS
+	bool "Build quick ipc Scripts"
+	default y
+	help
+		Build Ambarella Quick Ipc Scripts
+
+config BUILD_AMBARELLA_EAZYAI_CNNGUI_CONFIG
+	bool "Build CNNGUI Config"
+	default y
+	help
+		Build Ambarella CNNGUI Config
+
+menuconfig BUILD_AMBARELLA_EAZYAI_NN_ARM_TASK_PACKAGE
+	bool "Build Ambarella custom postprocess library"
+	default n
+	help
+		Build Ambarella custom postprocess library
+
+if BUILD_AMBARELLA_EAZYAI_NN_ARM_TASK_PACKAGE
+config BUILD_AMBARELLA_CONFIG_EAZYAI_NN_ARM_TASK_ALL
+	bool "Build all supported EazyAI NN ARM Task"
+	default n
+	select BUILD_AMBARELLA_CONFIG_EAZYAI_NN_ARM_TASK_YOLOV5
+	select BUILD_AMBARELLA_CONFIG_EAZYAI_NN_ARM_TASK_YOLOV8
+	select BUILD_AMBARELLA_CONFIG_EAZYAI_NN_ARM_TASK_DEEPLABV3
+	select BUILD_AMBARELLA_CONFIG_EAZYAI_NN_ARM_TASK_CENTERNET
+	select BUILD_AMBARELLA_CONFIG_EAZYAI_NN_ARM_TASK_YOLOX
+	select BUILD_AMBARELLA_CONFIG_EAZYAI_NN_ARM_TASK_RETINAFACE
+	select BUILD_AMBARELLA_CONFIG_EAZYAI_NN_ARM_TASK_LFFD
+	select BUILD_AMBARELLA_CONFIG_EAZYAI_NN_ARM_TASK_FGFD
+	select BUILD_AMBARELLA_CONFIG_EAZYAI_NN_ARM_TASK_YOLOV3
+	select BUILD_AMBARELLA_CONFIG_EAZYAI_NN_ARM_TASK_SSD
+	select BUILD_AMBARELLA_CONFIG_EAZYAI_NN_ARM_TASK_MOBILENETV2_NV12
+	select BUILD_AMBARELLA_CONFIG_EAZYAI_NN_ARM_TASK_OPENNET
+	select BUILD_AMBARELLA_CONFIG_EAZYAI_NN_ARM_TASK_HFNET
+	select BUILD_AMBARELLA_CONFIG_EAZYAI_NN_ARM_TASK_BISENET
+	select BUILD_AMBARELLA_CONFIG_EAZYAI_NN_ARM_TASK_FAIRMOT
+	select BUILD_AMBARELLA_CONFIG_EAZYAI_NN_ARM_TASK_QRCODE
+	help
+		Build all supported EazyAI NN ARM Task
+
+config BUILD_AMBARELLA_CONFIG_EAZYAI_NN_ARM_TASK_YOLOV5
+	bool "Build Ambarella custom postprocess library with yolov5"
+	default n
+	help
+		Build Ambarella custom postprocess library with yolov5
+
+config BUILD_AMBARELLA_CONFIG_EAZYAI_NN_ARM_TASK_YOLOV8
+	bool "Build Ambarella custom postprocess library with yolov8"
+	default n
+	select BUILD_AMBARELLA_EAZYAI_UTILS_PACKAGE
+	help
+		Build Ambarella custom postprocess library with yolov8
+
+config BUILD_AMBARELLA_CONFIG_EAZYAI_NN_ARM_TASK_DEEPLABV3
+	bool "Build Ambarella custom postprocess library with deeplabv3"
+	default n
+	select BUILD_AMBARELLA_EAZYAI_UTILS_PACKAGE
+	help
+		Build Ambarella custom postprocess library with deeplabv3
+
+config BUILD_AMBARELLA_CONFIG_EAZYAI_NN_ARM_TASK_CENTERNET
+	bool "Build Ambarella custom postprocess library with centernet"
+	default n
+	help
+		Build Ambarella custom postprocess library with centernet
+
+config BUILD_AMBARELLA_CONFIG_EAZYAI_NN_ARM_TASK_YOLOX
+	bool "Build Ambarella custom postprocess library with yolox"
+	default n
+	help
+		Build Ambarella custom postprocess library with yolox
+
+config BUILD_AMBARELLA_CONFIG_EAZYAI_NN_ARM_TASK_RETINAFACE
+	bool "Build Ambarella custom postprocess library with retinaface"
+	default n
+	help
+		Build Ambarella custom postprocess library with retinaface
+
+config BUILD_AMBARELLA_CONFIG_EAZYAI_NN_ARM_TASK_LFFD
+	bool "Build Ambarella custom postprocess library with lffd"
+	default n
+	help
+		Build Ambarella custom postprocess library with lffd
+
+config BUILD_AMBARELLA_CONFIG_EAZYAI_NN_ARM_TASK_FGFD
+	bool "Build Ambarella custom postprocess library with fgfd"
+	default n
+	help
+		Build Ambarella custom postprocess library with fgfd
+
+config BUILD_AMBARELLA_CONFIG_EAZYAI_NN_ARM_TASK_YOLOV3
+	bool "Build Ambarella custom postprocess library with yolov3"
+	default n
+	help
+		Build Ambarella custom postprocess library with yolov3
+
+config BUILD_AMBARELLA_CONFIG_EAZYAI_NN_ARM_TASK_SSD
+	bool "Build Ambarella custom postprocess library with ssd"
+	default n
+	help
+		Build Ambarella custom postprocess library with ssd
+
+config BUILD_AMBARELLA_CONFIG_EAZYAI_NN_ARM_TASK_MOBILENETV2_NV12
+	bool "Build Ambarella custom postprocess library with mobilenetv2_nv12"
+	default n
+	help
+		Build Ambarella custom postprocess library with mobilenetv2_nv12
+
+config BUILD_AMBARELLA_CONFIG_EAZYAI_NN_ARM_TASK_OPENNET
+	bool "Build Ambarella custom postprocess library with opennet"
+	default n
+	help
+		Build Ambarella custom postprocess library with opennet
+
+config BUILD_AMBARELLA_CONFIG_EAZYAI_NN_ARM_TASK_HFNET
+	bool "Build Ambarella custom postprocess library with hfnet"
+	default n
+	select BUILD_AMBARELLA_EAZYAI_UTILS_PACKAGE
+	help
+		Build Ambarella custom postprocess library with hfnet
+
+config BUILD_AMBARELLA_CONFIG_EAZYAI_NN_ARM_TASK_BISENET
+	bool "Build Ambarella custom postprocess library with bisenet"
+	default n
+	select BUILD_AMBARELLA_EAZYAI_UTILS_PACKAGE
+	help
+		Build Ambarella custom postprocess library with bisenet
+
+config BUILD_AMBARELLA_CONFIG_EAZYAI_NN_ARM_TASK_FAIRMOT
+	bool "Build Ambarella custom postprocess library with fairmot"
+	default n
+	select BUILD_AMBARELLA_EAZYAI_UTILS_PACKAGE
+	help
+		Build Ambarella custom postprocess library with fairmot
+
+config BUILD_AMBARELLA_CONFIG_EAZYAI_NN_ARM_TASK_QRCODE
+	bool "Build Ambarella custom postprocess library with qrcode"
+	default n
+	select BUILD_AMBARELLA_CONFIG_EAZYAI_NN_ARM_TASK_SSD
+	select CONFIG_AMBARELLA_OPENCV4_COREMISC_LIB_SUPPORT
+	help
+		Build Ambarella custom postprocess library with qrcode
+
+endif   ### BUILD_AMBARELLA_EAZYAI_NN_ARM_TASK_PACKAGE
+
+config BUILD_AMBARELLA_EAZYAI_UNIT_TEST
+	bool "Build EazyAI unit tests"
+	default n
+	select BUILD_AMBARELLA_EAZYAI_CORE_PACKAGE
+	select BUILD_AMBARELLA_EAZYAI_COMM_PACKAGE
+	select BUILD_AMBARELLA_EAZYAI_UTILS_PACKAGE
+	select BUILD_AMBARELLA_EAZYAI_QUICK_IPC_SCRIPTS
+	select BUILD_AMBARELLA_EAZYAI_CNNGUI_CONFIG
+	select BUILD_AMBARELLA_EAZYAI_NN_ARM_TASK_PACKAGE
+	help
+		Build Ambarella Private EazyAI unit tests
+
+config BUILD_AMBARELLA_EAZYAI_CORE_API_TEST
+	bool "Build EazyAI core API tests"
+	default n
+	select BUILD_AMBARELLA_EAZYAI_CORE_PACKAGE
+	select BUILD_AMBARELLA_EAZYAI_COMM_PACKAGE
+	select BUILD_AMBARELLA_EAZYAI_UTILS_PACKAGE
+	help
+		Build Ambarella Private EazyAI core API tests

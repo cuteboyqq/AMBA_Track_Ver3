@@ -401,11 +401,16 @@ float Object::_getHeightVelocity(int frameInterval)
 
 void Object::updateKeypoint(vector<cv::KeyPoint> &kpt)
 {
+  // cout<<"------In updateKeypoint------"<<endl;
+
+  // cout<<"   start m_currKpts.size()="<<m_currKpts.size()<<endl;
   if (m_currKpts.size() != 0)
   {
     m_prevKpts.assign(m_currKpts.begin(), m_currKpts.end());
   }
   m_currKpts.assign(kpt.begin(), kpt.end());
+  // cout<<"   end m_currKpts.size()="<<m_currKpts.size()<<endl;
+  // cout<<"-------End updateKeypoint--------"<<endl;
 }
 
 

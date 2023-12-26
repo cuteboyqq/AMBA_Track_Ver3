@@ -304,7 +304,7 @@ void Trajectory::bboxToTrajectory(vector<Object> &objectList)
     // 5 or 9 Boxes
     vector<BoundingBox> rescaleBboxList;
     vector<BoundingBox> smoothedBboxList;
-    cout<<"ptrObj->bboxList.size() = "<<ptrObj->bboxList.size()<<endl;
+    // cout<<"ptrObj->bboxList.size() = "<<ptrObj->bboxList.size()<<endl;
     for (int i=0; i<ptrObj->bboxList.size(); i++)
     {
       BoundingBox rescaleBox(-1, -1, -1, -1, ptrObj->bboxList[i].label);
@@ -318,7 +318,7 @@ void Trajectory::bboxToTrajectory(vector<Object> &objectList)
 
     _bboxPreprocessing(rescaleBboxList, smoothedBboxList, 3);
 
-    cout << "[DBG] >>>>>> smoothedBboxList.size() = " << smoothedBboxList.size() << endl;
+    // cout << "[DBG] >>>>>> smoothedBboxList.size() = " << smoothedBboxList.size() << endl;
     // StepB. Bounding Box to Bird's Eye view
     for (int i=0; i<(int)smoothedBboxList.size(); i++)
     {
@@ -663,9 +663,15 @@ float Trajectory::_bboxToDistanceZ(BoundingBox& box)
 
 
 float Trajectory::updateLocation3D(Object& obj)
-{
+{ 
+  // cout<<"In func updateLocation3D :"<<endl;
+  // cout<<"[updateLocation3D] obj.bboxList.size() :"<<obj.bboxList.size()<<endl;
    if (obj.bboxList.size() == 0)
+  {
+    // cout<<"[updateLocation3D] obj.bboxList.size() :"<<obj.bboxList.size()<<" return -1"<<endl;
     return -1;
+  }
+    
 
   BoundingBox& box = obj.bboxList.back();
   Point pCenter = box.getCenterPoint();
@@ -683,13 +689,13 @@ float Trajectory::updateLocation3D(Object& obj)
   float distanceX = (distanceZ / pY) * (pX);
   float distanceY = 0;
 
-  cout << "ID = " << obj.id << endl;
-  cout << "Location = (" << distanceX << ", " << distanceY << ", " << distanceZ << ")" << endl;
-  cout << "DistX = " << xDist << endl;
-  cout << "xCenter = " << xCenter << endl;
-  cout << "pCenter x = " << pCenter.x << endl;
+  // cout << "ID = " << obj.id << endl;
+  // cout << "Location = (" << distanceX << ", " << distanceY << ", " << distanceZ << ")" << endl;
+  // cout << "DistX = " << xDist << endl;
+  // cout << "xCenter = " << xCenter << endl;
+  // cout << "pCenter x = " << pCenter.x << endl;
   cv::Point3f pLoc3D(distanceX, distanceY, distanceZ);
   obj.pLocation3D = pLoc3D;
-  cout<<"End Trajectory::updateLocation3D"<<endl;
+  // cout<<"End Trajectory::updateLocation3D"<<endl;
   return 0;
 }

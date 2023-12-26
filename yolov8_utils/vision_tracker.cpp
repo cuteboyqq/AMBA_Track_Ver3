@@ -17,9 +17,9 @@
 VisionTracker::VisionTracker(std::string configPath, int argc, char **argv)
 {
    // === initialize parameters === //
-  printf("[VisionTracker constructer]Start _init(configPath,argc,argv)\n");
+  // printf("[VisionTracker constructer]Start _init(configPath,argc,argv)\n");
   _init(configPath,argc,argv);
-  printf("[VisionTracker constructer]End _init(configPath,argc,argv)\n");
+  // printf("[VisionTracker constructer]End _init(configPath,argc,argv)\n");
 }
 
 VisionTracker::VisionTracker(std::string configPath)
@@ -37,9 +37,9 @@ VisionTracker::VisionTracker(std::string configPath)
 #endif
 
   // === initialize parameters === //
-  printf("[VisionTracker(std::string configPath)] Start _init(configPath)\n");
+  // printf("[VisionTracker(std::string configPath)] Start _init(configPath)\n");
   _init(configPath);
-  printf("[VisionTracker(std::string configPath)] End _init(configPath)\n");
+  // printf("[VisionTracker(std::string configPath)] End _init(configPath)\n");
 #if defined (SPDLOG)
   // Create a file rotating logger with 5 MB size max and 3 rotated files
   auto max_size = 1048576 * 5;
@@ -106,9 +106,9 @@ bool VisionTracker::_init(std::string configPath)
   // Create AI model
   if (utils::checkFileExists(m_config->modelPath))
   {
-    cout<<"Start creat YoloV8_Class"<<endl;
+    // cout<<"Start creat YoloV8_Class"<<endl;
     m_yolov8 = new YoloV8_Class(m_config);
-    cout<<"End creat YoloV8_Class"<<endl;
+    // cout<<"End creat YoloV8_Class"<<endl;
 #if defined (SPDLOG)
     m_logger->info("Init AI model ... Done");
 #endif
@@ -123,9 +123,9 @@ bool VisionTracker::_init(std::string configPath)
   }
 
   // ROI
-  cout<<"start _initROI"<<endl;
+  // cout<<"start _initROI"<<endl;
   _initROI();
-  cout<<"end _initROI"<<endl;
+  // cout<<"end _initROI"<<endl;
 #if defined (SPDLOG)
   m_logger->info("Init ROI ... Done");
 #endif
@@ -146,28 +146,28 @@ bool VisionTracker::_init(std::string configPath)
 
   // Distance Estimation
   m_focalRescaleRatio = (float)m_videoHeight / (float)m_modelHeight;
-  cout<<"Start Create Object Tracker"<<endl;
+  // cout<<"Start Create Object Tracker"<<endl;
   // Object Traccker
   m_humanTracker = new ObjectTracker(m_config, "human");
   m_bikeTracker = new ObjectTracker(m_config, "bike");
   m_vehicleTracker = new ObjectTracker(m_config, "vehicle");
   m_motorbikeTracker = new ObjectTracker(m_config, "motorbike");
-  cout<<"End Create Object Tracker"<<endl;
+  // cout<<"End Create Object Tracker"<<endl;
   // TODO:
-  cout<<"Start setROI"<<endl;
+  // cout<<"Start setROI"<<endl;
   m_vehicleTracker->setROI(*m_roi);
   m_bikeTracker->setROI(*m_roi);
   m_humanTracker->setROI(*m_roi);
   m_motorbikeTracker->setROI(*m_roi);
-  cout<<"End setROI"<<endl;
+  // cout<<"End setROI"<<endl;
 #if defined (SPDLOG)
   m_logger->info("Init Object Trackers ... Done");
 #endif
   
   _readDebugConfig();          // Debug Configuration
-  cout<<"End _readDebugConfig"<<endl;
+  // cout<<"End _readDebugConfig"<<endl;
   _readDisplayConfig();        // Display Configuration
-  cout<<"End _readDisplayConfig"<<endl;
+  // cout<<"End _readDisplayConfig"<<endl;
   // _readShowProcTimeConfig();   // Show Processing Time Configuration
   // cout<<"End _readShowProcTimeConfig"<<endl;
 #if defined (SPDLOG)
@@ -180,44 +180,44 @@ bool VisionTracker::_init(std::string configPath)
 
 bool VisionTracker::_init(std::string configPath,int argc, char **argv)
 {
-  cout<<"[_init] Start getDateTime"<<endl;
+  // cout<<"[_init] Start getDateTime"<<endl;
   // Get Date Time
   utils::getDateTime(m_dbg_dateTime);
-  cout<<"[_init] End getDateTime"<<endl;
+  // cout<<"[_init] End getDateTime"<<endl;
 
   // Read VisionTracker Configuration
-  cout<<"[_init] Start new Config_S"<<endl;
+  // cout<<"[_init] Start new Config_S"<<endl;
   m_config = new Config_S();
-  cout<<"[_init] Start new TrackerConfigReader"<<endl;
+  // cout<<"[_init] Start new TrackerConfigReader"<<endl;
   m_configReader = new TrackerConfigReader();
-  cout<<"[_init] Start TrackerConfigReader -> read"<<endl;
+  // cout<<"[_init] Start TrackerConfigReader -> read"<<endl;
   m_configReader->read(configPath);
 
-  cout<<"[_init] Start TrackerConfigReader -> getConfig"<<endl;
+  // cout<<"[_init] Start TrackerConfigReader -> getConfig"<<endl;
   m_config = m_configReader->getConfig();
-  cout<<"[_init] End TrackerConfigReader -> getConfig"<<endl;
+  // cout<<"[_init] End TrackerConfigReader -> getConfig"<<endl;
 
 
   // Create AI model
-  cout<<"[_init] Start checkFileExists(m_config->modelPath)"<<endl;
-  cout<<"m_config->modelPath = "<<m_config->modelPath<<endl;
+  // cout<<"[_init] Start checkFileExists(m_config->modelPath)"<<endl;
+  // cout<<"m_config->modelPath = "<<m_config->modelPath<<endl;
   if (utils::checkFileExists(m_config->modelPath))
   {
-    cout<<"Start creat YoloV8_Class"<<endl;
+    // cout<<"Start creat YoloV8_Class"<<endl;
     m_yolov8 = new YoloV8_Class(m_config,argc,argv);
-    cout<<"End creat YoloV8_Class"<<endl;
+    // cout<<"End creat YoloV8_Class"<<endl;
 
   }
   else
   {
-    cout<<"[_init] checkFileExists(m_config->modelPath) is not exist, exit(0)"<<endl;
+    // cout<<"[_init] checkFileExists(m_config->modelPath) is not exist, exit(0)"<<endl;
     exit(0);
   }
 
   // ROI
-  cout<<"start _initROI"<<endl;
+  // cout<<"start _initROI"<<endl;
   _initROI();
-  cout<<"end _initROI"<<endl;
+  // cout<<"end _initROI"<<endl;
 
 
   // Video Input Size
@@ -236,33 +236,33 @@ bool VisionTracker::_init(std::string configPath,int argc, char **argv)
 
   // Distance Estimation
   m_focalRescaleRatio = (float)m_videoHeight / (float)m_modelHeight;
-  cout<<"Start Create Object Tracker 2023-11-30"<<endl;
+  // cout<<"Start Create Object Tracker 2023-11-30"<<endl;
   // Object Traccker
-  cout<<"Create ObjectTracker m_humanTracker"<<endl;
+  // cout<<"Create ObjectTracker m_humanTracker"<<endl;
   m_humanTracker = new ObjectTracker(m_config, "human");
-  cout<<"Create ObjectTracker m_humanTracker Done....."<<endl;
+  // cout<<"Create ObjectTracker m_humanTracker Done....."<<endl;
   m_bikeTracker = new ObjectTracker(m_config, "bike");
-  cout<<"Create ObjectTracker m_bikeTracker Done....."<<endl;
+  // cout<<"Create ObjectTracker m_bikeTracker Done....."<<endl;
   m_vehicleTracker = new ObjectTracker(m_config, "vehicle");
-  cout<<"Create ObjectTracker m_vehicleTracker Done....."<<endl;
+  // cout<<"Create ObjectTracker m_vehicleTracker Done....."<<endl;
   m_motorbikeTracker = new ObjectTracker(m_config, "motorbike");
-  cout<<"Create ObjectTracker m_motorbikeTracker Done....."<<endl;
-  cout<<"End Create Object Tracker 2023-11-30"<<endl;
+  // cout<<"Create ObjectTracker m_motorbikeTracker Done....."<<endl;
+  // cout<<"End Create Object Tracker 2023-11-30"<<endl;
   // TODO:
-  cout<<"Start setROI"<<endl;
+  // cout<<"Start setROI"<<endl;
   m_vehicleTracker->setROI(*m_roi);
   m_bikeTracker->setROI(*m_roi);
   m_humanTracker->setROI(*m_roi);
   m_motorbikeTracker->setROI(*m_roi);
-  cout<<"End setROI"<<endl;
+  // cout<<"End setROI"<<endl;
 #if defined (SPDLOG)
   m_logger->info("Init Object Trackers ... Done");
 #endif
   
   _readDebugConfig();          // Debug Configuration
-  cout<<"End _readDebugConfig"<<endl;
+  // cout<<"End _readDebugConfig"<<endl;
   _readDisplayConfig();        // Display Configuration
-  cout<<"End _readDisplayConfig"<<endl;
+  // cout<<"End _readDisplayConfig"<<endl;
   // _readShowProcTimeConfig();   // Show Processing Time Configuration
   // cout<<"End _readShowProcTimeConfig"<<endl;
 
@@ -623,9 +623,9 @@ clock_t start, end;
 double track_take_time;
 
 
-  printf(" [run] Start get image \n");
+  // printf(" [run] Start get image \n");
   cv::Mat imFrame = m_yolov8->Get_img();
-  printf(" [run] End get image \n");
+  // printf(" [run] End get image \n");
 
 
 
@@ -640,17 +640,17 @@ double track_take_time;
   }
 
   // Get Image Frame
-  printf(" [run] Start clone img --> m_dsp_img \n");
+  // printf(" [run] Start clone img --> m_dsp_img \n");
   if (m_dsp_results) m_dsp_img = imFrame.clone();
-  printf(" [run] End clone img --> m_dsp_img \n");
+  // printf(" [run] End clone img --> m_dsp_img \n");
   // Entry Point
   if (m_frameIdx % m_frameStep == 0)
   {
 
     // Get Image Frame
-    printf(" [run] Start clone img --> m_img \n");
+    // printf(" [run] Start clone img --> m_img \n");
     m_img = imFrame.clone();
-    printf(" [run] End clone img --> m_img \n");
+    // printf(" [run] End clone img --> m_img \n");
     // AI Inference
     if (!_modelInfernece())
     {
@@ -722,12 +722,12 @@ double track_take_time;
 // Alister modified 2023-11-29
 bool VisionTracker::_modelInfernece()
 { 
-  cout<<"In [_modelInfernece]"<<endl;
+  // cout<<"In [_modelInfernece]"<<endl;
   if (!m_yolov8->run())
   {
     return FAILURE;
   }
-  cout<<"Leave [_modelInfernece]"<<endl;
+  // cout<<"Leave [_modelInfernece]"<<endl;
   return SUCCESS;
 }
 // bool VisionTracker::_modelInfernece(std::vector<BoundingBox> bboxList)
@@ -813,7 +813,7 @@ bool VisionTracker::_modelInfernece()
 //Original Code 2023-11-29
 bool VisionTracker::_objectDetection()
 {
-  cout<<"In [_objectDetection]"<<endl;
+  // cout<<"In [_objectDetection]"<<endl;
 
   m_yolov8->getHumanBoundingBox(
     m_humanBBoxList,
@@ -847,7 +847,7 @@ bool VisionTracker::_objectDetection()
     *m_roi
   );
 
-  cout<<"Leave [_objectDetection]"<<endl;
+  // cout<<"Leave [_objectDetection]"<<endl;
 
 #if defined (SPDLOG)
   // Debug Logs
@@ -870,59 +870,83 @@ bool VisionTracker::_objectDetection()
 
 bool VisionTracker::_objectTracking()
 {
-  cout<<"in [_objectTracking]"<<endl;
+  // cout<<"@@@@@@@ In [_objectTracking]@@@@@@@@@@@@@@@@@"<<endl;
   // Run Object Tracking
-  cout<<"Start run-------------------"<<endl;
+  // cout<<"Step 1 :start run-------------------"<<endl;
 
-  cout<<"start human"<<endl;
+  // cout<<"------------------start human----------------------"<<endl;
+  // cout<< "[_objectTracking] Before m_humanBBoxList.size():"<<m_humanBBoxList.size()<<endl;
   m_humanTracker->run(m_img, m_humanBBoxList); //TODO:
-  cout<<"end human"<<endl;
+  // cout<< "[_objectTracking] After m_humanBBoxList.size():"<<m_humanBBoxList.size()<<endl;
+  // cout<<"------------------end human-----------------------"<<endl;
 
-  cout<<"start bike"<<endl;
+  // cout<<"-------------------start bike-----------------"<<endl;
   m_bikeTracker->run(m_img, m_bikeBBoxList); //TODO:
-  cout<<"end bike"<<endl;
+  // cout<<"-------------------end bike----------------"<<endl;
 
-  cout<<"start vehicle"<<endl;
+  // cout<<"---------------------start vehicle--------------------------"<<endl;
   m_vehicleTracker->run(m_img, m_vehicleBBoxList); //TODO:
-  cout<<"end vehicle"<<endl;
+  // cout<<"--------------------end vehicle-------------------------------"<<endl;
 
-  cout<<"start motorbike"<<endl;
+  // cout<<"--------------------start motorbike-------------------------------"<<endl;
   m_motorbikeTracker->run(m_img, m_motorbikeBBoxList); //TODO:
-  cout<<"end motorbike"<<endl;
+  // cout<<"--------------------end motorbike-----------------------------------"<<endl;
 
-  cout<<"End run---------------------"<<endl;
+  // cout<<"Step 1 : End run---------------------"<<endl;
   // Get Tracked Objects
-  cout<<"Start getObjectList"<<endl;
+  // cout<<"Step 2 :=============Start getObjectList==================="<<endl;
+  // cout<< "[_objectTracking] Before m_humanObjList.size():"<<m_humanObjList.size()<<endl;
+  //  cout<< "[_objectTracking] Before m_humanBBoxList.size():"<<m_humanBBoxList.size()<<endl;
   m_humanTracker->getObjectList(m_humanObjList);
+  // cout<< "[_objectTracking] after m_humanObjList.size():"<<m_humanObjList.size()<<endl;
+  //  cout<< "[_objectTracking] after m_humanBBoxList.size():"<<m_humanBBoxList.size()<<endl;
   m_bikeTracker->getObjectList(m_bikeObjList);
   m_vehicleTracker->getObjectList(m_vehicleObjList);
   m_motorbikeTracker->getObjectList(m_motorbikeObjList);
-  cout<<"End getObjectList"<<endl;
+  // cout<<"Step 2 :======================End getObjectList========================"<<endl;
   // Get Location of Tracked Objects
-  cout<<"Start getTrackedObjList"<<endl;
+  // cout<<"Step 3 :~~~~~~~~~~~~~~~~~~~Start getTrackedObjList~~~~~~~~~~~~~~~~~~~~~~~~~~~~"<<endl;
+  // cout<< "[_objectTracking] Before m_humanTrackObjList.size():"<<m_humanTrackObjList.size()<<endl;
   m_humanTracker->getTrackedObjList(m_humanTrackObjList);
+  //  cout<< "[_objectTracking] After m_humanTrackObjList.size():"<<m_humanTrackObjList.size()<<endl;
+
+  // cout<< "============[_objectTracking] Start m_bikeTracker->getTrackedObjList:=========="<<endl;
   m_bikeTracker->getTrackedObjList(m_bikeTrackObjList);
+  // cout<< "============[_objectTracking] End m_bikeTracker->getTrackedObjList:=========="<<endl;
+
+  //  cout<< "============[_objectTracking] Start m_vehicleTracker->getTrackedObjList:=========="<<endl;
   m_vehicleTracker->getTrackedObjList(m_vehicleTrackObjList);
+  // cout<< "============[_objectTracking] End m_vehicleTracker->getTrackedObjList:=========="<<endl;
+
+  // cout<< "============[_objectTracking] Start m_motorbikeTracker->getTrackedObjList:=========="<<endl;
   m_motorbikeTracker->getTrackedObjList(m_motorbikeTrackObjList);
-  cout<<"End getTrackedObjList"<<endl;
+  // cout<< "============[_objectTracking] End m_motorbikeTracker->getTrackedObjList:=========="<<endl;
+
+  // cout<<"Step 3 : ~~~~~~~~~~~~~~~~~~End getTrackedObjList~~~~~~~~~~~~~~~~~~~~~~~~~~~~"<<endl;
   // Merge Tracked Objects
-  cout<<"Start Merge Tracked Objects"<<endl;
+  // cout<<"Step 4 : ----------------Start Merge Tracked Objects ====> m_trackedObjList-------------------"<<endl;
+  // cout<<"         Step 4 : ----------------m_humanObjList-------------------"<<endl;
+  //  cout<<"        Step 4 : ----------------m_bikeObjList-------------------"<<endl;
+  //  cout<<"        Step 4 : ----------------m_vehicleObjList-------------------"<<endl;
+  //  cout<<"        Step 4 : ----------------m_motorbikeObjList-------------------"<<endl;
   m_trackedObjList.clear();
   m_trackedObjList.insert(m_trackedObjList.end(), m_humanObjList.begin(), m_humanObjList.end());
   m_trackedObjList.insert(m_trackedObjList.end(), m_bikeObjList.begin(), m_bikeObjList.end());
   m_trackedObjList.insert(m_trackedObjList.end(), m_vehicleObjList.begin(), m_vehicleObjList.end());
   m_trackedObjList.insert(m_trackedObjList.end(), m_motorbikeObjList.begin(), m_motorbikeObjList.end());
-  cout<<"End Merge Tracked Objects"<<endl;
+  //  cout<<"Step 4 : ----------------End Merge Tracked Objects-------------------"<<endl;
   // Bounding Box Smoothing
-  cout<<"Start updateSmoothBoundingBoxList"<<endl;
+  // cout<<"Step 5 : ----------Start updateSmoothBoundingBoxList ====> m_trackedObjList---------------------"<<endl;
   for (int i=0; i<m_trackedObjList.size(); i++)
   {
     m_trackedObjList[i].updateSmoothBoundingBoxList();
   }
-  cout<<"End updateSmoothBoundingBoxList"<<endl;
+  // cout<<"End updateSmoothBoundingBoxList"<<endl;
   printf("[bool VisionTracker::_objectTracking()] End updateSmoothBoundingBoxList\n");
 
-  cout<<"End [_objectTracking]"<<endl;
+  // cout<<"Step 5 : ----------end updateSmoothBoundingBoxList---------------------"<<endl;
+
+  //  cout<<"@@@@@@@ End [_objectTracking]@@@@@@@@@@@@@@@@@"<<endl;
   return SUCCESS;
 }
 
@@ -1035,9 +1059,9 @@ void VisionTracker::_saveDrawResults()
   string imgName = "frame_" + std::to_string(m_frameIdx) + ".jpg";
   string imgPath = m_dbg_imgsDirPath + "/" + imgName;
   // string imgPath = "/ali/yolov8/out2/" + imgName;
-  cout<<"imgPath : "<<imgPath<<endl;
+  // cout<<"imgPath : "<<imgPath<<endl;
   cv::imwrite(imgPath, m_dsp_imgResize);
-  cout<<"Save tracking image done -------"<<endl;
+  // cout<<"Save tracking image done -------"<<endl;
 
 }
 
@@ -1103,7 +1127,7 @@ void VisionTracker::_drawBoundingBoxes()
 
 void VisionTracker::_drawTrackedObjects()
 {
-  cout<<"In [_drawTrackedObjects]"<<endl;
+  // cout<<"In [_drawTrackedObjects]"<<endl;
   for (int i = 0; i < m_trackedObjList.size(); i++)
   {
     const Object& trackedObj = m_trackedObjList[i];
@@ -1138,11 +1162,11 @@ void VisionTracker::_drawTrackedObjects()
       m_config->modelWidth, m_config->modelHeight,
       m_config->frameWidth, m_config->frameHeight);
 
-    cout<<"In Func : _drawTrackedObjects : "<<endl;
-    cout<<"rescaleBox.x1:"<<rescaleBox.x1<<endl;
-    cout<<"rescaleBox.y1:"<<rescaleBox.y1<<endl;
-    cout<<"rescaleBox.x2:"<<rescaleBox.x2<<endl;
-    cout<<"rescaleBox.y2:"<<rescaleBox.y2<<endl;
+    // cout<<"In Func : _drawTrackedObjects : "<<endl;
+    // cout<<"rescaleBox.x1:"<<rescaleBox.x1<<endl;
+    // cout<<"rescaleBox.y1:"<<rescaleBox.y1<<endl;
+    // cout<<"rescaleBox.x2:"<<rescaleBox.x2<<endl;
+    // cout<<"rescaleBox.y2:"<<rescaleBox.y2<<endl;
 
 
     if (trackedObj.aliveCounter < 3)
@@ -1208,7 +1232,7 @@ void VisionTracker::_drawTrackedObjects()
       cv::FONT_HERSHEY_DUPLEX, 2.0,
       cv::Scalar(255, 255, 255), 2, 5, 0);
   }
-  cout<<"End [_drawTrackedObjects]"<<endl;
+  // cout<<"End [_drawTrackedObjects]"<<endl;
 }
 
 
@@ -1252,11 +1276,11 @@ void VisionTracker::_drawObjectLocation()
 void VisionTracker::_drawResults()
 {
   int waitKey = 1;
-  cout<<"====================m_dsp_objectDetection = "<<m_dsp_objectDetection<<endl;
-  // if (m_dsp_objectDetection)
-  // {
-  //   _drawBoundingBoxes();
-  // }
+  // cout<<"====================m_dsp_objectDetection = "<<m_dsp_objectDetection<<endl;
+  if (m_dsp_objectDetection)
+  {
+    _drawBoundingBoxes();
+  }
   
   if (m_dsp_objectTracking)
   {

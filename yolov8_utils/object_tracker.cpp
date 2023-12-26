@@ -213,9 +213,12 @@ bool ObjectTracker::_initObjectList()
 
 
 void ObjectTracker::_assignObjectList()
-{
+{ 
+  // cout<<"in _assignObjectList()"<<endl;
+  // cout<<"m_maxObject = "<<m_maxObject<<endl;
+
   for (int i=0; i<m_maxObject; i++)
-  {
+  { 
     Object *ptrObj = &m_currObjList[i];
     m_prevObjList[i].id = ptrObj->id;
     m_prevObjList[i].updateStatus(ptrObj->status);
@@ -224,6 +227,8 @@ void ObjectTracker::_assignObjectList()
     m_prevObjList[i].updateKeypoint(ptrObj->m_currKpts);
     m_prevObjList[i].aliveCounter = 1;
   }
+  // cout<<"m_prevObjList.size()"<<m_prevObjList.size()<<endl;
+  // cout<<"end _assignObjectList()"<<endl;
 }
 
 
@@ -258,43 +263,50 @@ void ObjectTracker::run(cv::Mat &img, vector<BoundingBox> &bboxList)
   }
 #endif
 
-  cout<<"Start _setCurrBoundingBox"<<endl;
-  _setCurrBoundingBox(bboxList);
-  cout<<"End _setCurrBoundingBox"<<endl;
-
-  cout<<"Start _updateFrameStamp"<<endl;
-  _updateFrameStamp();
-  cout<<"End _updateFrameStamp"<<endl;
-
-  cout<<"Start _setCurrFrame"<<endl;
-  _setCurrFrame(img);
-  cout<<"End _setCurrFrame"<<endl;
-
-  cout<<"Start _updateCurrObjectList"<<endl;
-  _updateCurrObjectList();
-  cout<<"End _updateCurrObjectList"<<endl;
-
-  cout<<"Start _updateTrackingObject"<<endl;
-  _updateTrackingObject();
-  cout<<"End _updateTrackingObject"<<endl;
-
-  cout<<"Start _filterOverlapObject"<<endl;
-  _filterOverlapObject();
-  cout<<"End _filterOverlapObject"<<endl;
-
-
-
+  // cout<<"[run] Start _setCurrBoundingBox"<<endl;
   // _setCurrBoundingBox(bboxList);
- 
+  // cout<<"[run] bboxList.size()"<<bboxList.size()<<endl;
+  // cout<<"[run] m_bboxList.size()"<<m_bboxList.size()<<endl;
+  // cout<<"[run]End _setCurrBoundingBox"<<endl;
+
+  // cout<<"[run] Start _updateFrameStamp"<<endl;
   // _updateFrameStamp();
-  
+  // cout<<"[run] bboxList.size()"<<bboxList.size()<<endl;
+  // cout<<"[run] End _updateFrameStamp"<<endl;
+
+  // cout<<"[run] Start _setCurrFrame"<<endl;
   // _setCurrFrame(img);
-  
+  // cout<<"[run] bboxList.size()"<<bboxList.size()<<endl;
+  // cout<<"[run] End _setCurrFrame"<<endl;
+
+  // cout<<"[run] Start _updateCurrObjectList"<<endl;
   // _updateCurrObjectList();
-  
+  // cout<<"[run] bboxList.size()"<<bboxList.size()<<endl;
+  // cout<<"[run] End _updateCurrObjectList"<<endl;
+
+  // cout<<"[run] Start _updateTrackingObject"<<endl;
   // _updateTrackingObject();
-  
+  // cout<<"[run] bboxList.size()"<<bboxList.size()<<endl;
+  // cout<<"[run] End _updateTrackingObject"<<endl;
+
+  // cout<<"[run] Start _filterOverlapObject"<<endl;
   // _filterOverlapObject();
+  // cout<<"[run] bboxList.size()"<<bboxList.size()<<endl;
+  // cout<<"[run] End _filterOverlapObject"<<endl;
+
+
+
+  _setCurrBoundingBox(bboxList);
+ 
+  _updateFrameStamp();
+  
+  _setCurrFrame(img);
+  
+  _updateCurrObjectList();
+  
+  _updateTrackingObject();
+  
+  _filterOverlapObject();
   
  
 
@@ -314,7 +326,8 @@ void ObjectTracker::_updateTrackingObject()
 #if defined (SPDLOG)
   auto m_logger = spdlog::get(m_loggerStr);
 #endif
-
+  // cout<<"In [_updateTrackingObject]"<<endl;
+  // cout<<"m_currObjList.size() = "<<m_currObjList.size()<<endl;
   // Max Tracking
   int numCurrObj = 0;
   int numPrevObj = 0;
@@ -342,24 +355,34 @@ void ObjectTracker::_updateTrackingObject()
     }
   }
 
+  // cout<<"[_updateTrackingObject]  numCurrObj = "<<numCurrObj<<endl;
+  // cout<<"numCurrObj should > 0 that go  into the _assignObjectList()"<<endl;
   // Update Object List
   // If detect object
   if (numCurrObj > 0)
   {
     // If first frame, dont do tracking but save current objects
+    //  Alister note this 2023-12-20
     if (m_isFirstTracking)
     {
+      // cout<<"[_updateTrackingObject] In m_isFirstTracking"<<endl;
       _assignObjectList();
       m_isFirstTracking = false;
+      // cout<<"[_updateTrackingObject] Out m_isFirstTracking"<<endl;
     }
     // if not first frame and previous frame has no object
+    // if ((!m_isFirstTracking) && (numPrevObj == 0)) //Alister use if 2023-12-20
     else if ((!m_isFirstTracking) && (numPrevObj == 0))
-    {
+    { 
+      // cout<<"[_updateTrackingObject] In (!m_isFirstTracking) && (numPrevObj == 0)"<<endl;
       _assignObjectList();
+      // cout<<"[_updateTrackingObject] Out (!m_isFirstTracking) && (numPrevObj == 0)"<<endl;
     }
     else
     {
+      // cout<<"In _ReID"<<endl;
       _ReID(m_currObjList, m_prevObjList, m_frameInterval);
+      // cout<<"Out _ReID"<<endl;
     }
   }
   else
@@ -373,20 +396,33 @@ void ObjectTracker::_updateTrackingObject()
   {
     cout << "-------------------------------" << endl;
     cout << m_loggerStr << endl;
-    m_trajectory->bboxToTrajectory(m_prevObjList);
-    cout << "finish bboxToTrajectory " << endl;
-    cout << "m_prevObjList.size() = " << m_prevObjList.size() << endl;
+    // m_trajectory->bboxToTrajectory(m_prevObjList);
+    // cout << "finish bboxToTrajectory " << endl;
+    // cout << "[_updateTrackingObject] m_prevObjList.size() = " << m_prevObjList.size() << endl;
     for (int i=0; i<m_prevObjList.size(); i++)
     {
       Object& obj = m_prevObjList[i];
       if (obj.status == 0)
+      {
+        // cout<<"m_prevObjList["<<i<<"]"<< " obj.status = "<<obj.status<<endl;
         continue;
+      }
+      // else{
+      //    cout<<"m_prevObjList["<<i<<"]"<< " obj.status = "<<obj.status<<endl;
+      // }
+        
 
       float d = m_trajectory->updateLocation3D(obj);
-      cout << "finished updateLocation3D " << endl;
-      // cout << "Obj[" << obj.id << "] Loc = (" << obj.pLocation3D.x << " m, " << obj.pLocation3D.y << " m, " << obj.pLocation3D.z << " m)" << endl;
+      // cout << "finished updateLocation3D " << endl;
+      cout << "Obj[" << obj.id << "] Loc = (" << obj.pLocation3D.x << " m, " << obj.pLocation3D.y << " m, " << obj.pLocation3D.z << " m)" << endl;
     }
-    cout << "finish updateLocation3D " << endl;
+
+    for (int i=0; i<m_currObjList.size(); i++)
+    {
+      Object& obj = m_currObjList[i];
+      //  cout<<"m_currObjList["<<i<<"]"<< " obj.status = "<<obj.status<<endl;
+    }
+    // cout << "finish updateLocation3D " << endl;
 
   }
 }
@@ -405,28 +441,40 @@ void ObjectTracker::getTrackedObjList(vector<TrackedObj> &objList)
       numPrevObj += 1;
     }
   }
-
+  // cout<<"[getTrackedObjList] numPrevObj = "<<numPrevObj<<endl;
   // If object's disappear counter > threshold,
   // then stop displaying or sending trajectory points
   int bevDisappear = NUM_BEV_VALID_MULTI;
   if (numPrevObj <= 1)
     bevDisappear = NUM_BEV_VALID_SINGLE;
 
+  //  cout<<"[getTrackedObjList] m_prevObjList.size() = "<<m_prevObjList.size()<<endl;
+  //  cout<<"m_tAliveCounter = "<<m_tAliveCounter<<endl; 
   for (int i=0; i<m_prevObjList.size(); i++)
   {
     int id = m_prevObjList[i].id;
     int aliveCounter = m_prevObjList[i].aliveCounter;
     vector<Point> trajectoryList = m_prevObjList[i].m_trajList;
-
+    // Alister note 2023-12-20
     if (aliveCounter < m_tAliveCounter)
+    { 
+      // cout<<"aliveCounter = "<<aliveCounter<<endl;
+      // cout<<"[getTrackedObjList] aliveCounter < m_tAliveCounter, continue....."<<endl;
       continue;
-
+    }
+      
+    //if (m_prevObjList[i].status == 0)
     else if (m_prevObjList[i].status == 0)
+    {
+      // cout<<"[getTrackedObjList] m_prevObjList[i].status == 0, continue....."<<endl;
       continue;
+    }
+      
 
     // if object disappears too long then don't show point
     if (m_prevObjList[i].disappearCounter > bevDisappear)
     {
+      // cout<<"[getTrackedObjList] m_prevObjList[i].disappearCounter > bevDisappear, continue....."<<endl;
       continue;
     }
     else
@@ -437,9 +485,11 @@ void ObjectTracker::getTrackedObjList(vector<TrackedObj> &objList)
       trackObj.type = m_prevObjList[i].bboxList.back().label;
       trackObj.confidence = m_prevObjList[i].bboxList.back().confidence;
       trackObj.pLoc = m_prevObjList[i].pLocation3D;
+      // cout<<"[getTrackedObjList] Find the trackObj, push back to objList"<<endl;
       objList.push_back(trackObj);
     }
   }
+  // cout<<"In [getTrackedObjList] objList.size()"<<objList.size()<<endl;
 }
 
 
@@ -463,7 +513,7 @@ int ObjectTracker::_updateCurrObjectList() //TODO: refactor?
   for (int i=0; i<(int)m_bboxList.size(); i++)
   {
     BoundingBox bbox = m_bboxList[i];
-
+  
     // If bounding box is "car"
     time_0 = std::chrono::high_resolution_clock::now();
 
@@ -525,7 +575,8 @@ int ObjectTracker::_updateCurrObjectList() //TODO: refactor?
     { 
       if (_isValidHumanBBox(bbox))
       { 
-        cout<<"start human part~~~~~~~~~"<<endl;
+        // cout<<"start human part~~~~~~~~~"<<endl;
+        // cout<<"detection number : m_bboxList.size() = "<<m_bboxList.size()<<", the "<<(i+1)<<" object"<<endl;
         Point pCenter = bbox.getCenterPoint();
 
         Object *ptrObj = &m_currObjList[objIdx];
@@ -536,23 +587,23 @@ int ObjectTracker::_updateCurrObjectList() //TODO: refactor?
 
         // Appearance Features
         BoundingBox rescaleBBox(-1, -1, -1, -1, m_bboxList[i].label);
-        cout<<" start rescaleBBox"<<endl;
+        // cout<<" start rescaleBBox"<<endl;
         utils::rescaleBBox(
           m_bboxList[i], rescaleBBox, m_modelWidth, m_modelHeight, m_videoWidth, m_videoHeight);
-        cout<<" End rescaleBBox"<<endl;
+        // cout<<" End rescaleBBox"<<endl;
         cv::Mat imgCrop;
-        cout<<" Start cropImages"<<endl;
+        // cout<<" Start cropImages"<<endl;
         imgUtil::cropImages(m_img, imgCrop, rescaleBBox);
-        cout<<" end cropImages"<<endl;
+        // cout<<" end cropImages"<<endl;
         // Get Keypoints and Descriptors
         cv::Mat imgGray;
         vector<cv::KeyPoint> kpt;
-        cout<<" Start cvtColor"<<endl;
+        // cout<<" Start cvtColor"<<endl;
         cv::cvtColor(imgCrop, imgGray, cv::COLOR_BGR2GRAY);
-        cout<<" End cvtColor"<<endl;
+        // cout<<" End cvtColor"<<endl;
         _calcKeypoint(imgGray, kpt);
         ptrObj->updateKeypoint(kpt);
-        cout<<"end human part~~~~~~~~~"<<endl;
+        // cout<<"end human part~~~~~~~~~"<<endl;
         // // Trajectory
         // vector<Point> tmpTrajectoryList;
         // Point pLocation = m_trajectory->bboxToPointSimple(bbox);
@@ -645,8 +696,8 @@ void ObjectTracker::_getMatchScoreDictList(
     // Step1. Calculate Similarity Score
     // ===
     // if (m_task == TRACK_CAR)
-    rSimilarity = _calcSimilarityScore(*ptrKeyObj, queryObj);
-
+    rSimilarity = _calcSimilarityScore(*ptrKeyObj, queryObj); // here return nan (root cause 2023-12-26)
+    // cout<<"[_getMatchScoreDictList] rSimilarity = _calcSimilarityScore(*ptrKeyObj, queryObj) = "<<rSimilarity<<endl;
     // ===
     // Step2. Calculate "Bounding Box Overlap" ratio
     // ===
@@ -658,7 +709,9 @@ void ObjectTracker::_getMatchScoreDictList(
     // ===
     rArea = abs(keyArea-queryArea) / queryArea;
 
-
+    // cout<<"[_getMatchScoreDictList] Step3. Calculate Bounding Box Area ratio"<<endl;
+    // cout<<"[_getMatchScoreDictList] rArea = abs(keyArea-queryArea) / queryArea = "<<rArea<<endl;
+    
     // ===
     // Step4. Calculate "Disppear Frame" ratio
     // ===
@@ -678,10 +731,21 @@ void ObjectTracker::_getMatchScoreDictList(
     // ===
     matchScoreLv1 = (rOverlapSmall * wOverlap) + (rSimilarity * wSimilarity);
     matchScoreLv2 = (rOverlapBig * wOverlap) + (rSimilarity * wSimilarity);
-
+    // cout<<"[_getMatchScoreDictList] Step5. Calculate Matching Score"<<endl;
+    // cout<<"[_getMatchScoreDictList] rOverlapSmall = "<<rOverlapSmall<<endl;
+    // cout<<"[_getMatchScoreDictList] rOverlapBig = "<<rOverlapBig<<endl;
+    // cout<<"[_getMatchScoreDictList] matchScoreLv1 = (rOverlapSmall * wOverlap) + (rSimilarity * wSimilarity)"<<endl;
+    // cout<<"[_getMatchScoreDictList] matchScoreLv2 = (rOverlapBig * wOverlap) + (rSimilarity * wSimilarity);"<<endl;
+    // cout<<"[_getMatchScoreDictList] matchScoreLv1 *= rDisappear = "<<matchScoreLv1<<endl;
+    // cout<<"[_getMatchScoreDictList] matchScoreLv2 *= rDisappear = "<<matchScoreLv2<<endl;
     // Adjust matching score by disappear ratio
     matchScoreLv1 *= rDisappear;
     matchScoreLv2 *= rDisappear;
+    // cout<<"[_getMatchScoreDictList] Adjust matching score by disappear ratio"<<endl;
+    // cout<<"rDisappear = "<<rDisappear<<endl;
+    // cout<<"matchScoreLv1 *= rDisappear = "<<matchScoreLv1<<endl;
+    // cout<<"matchScoreLv2 *= rDisappear = "<<matchScoreLv2<<endl;
+
 
     // ===
     // Step6. Decrease match socre to distinguish with real match
@@ -690,6 +754,9 @@ void ObjectTracker::_getMatchScoreDictList(
     // Case1: If key bounding box area are two times than query bounding box area
     if (rArea > 2.0)
     {
+      // cout<<"[_getMatchScoreDictList] rArea > 2.0"<<endl;
+      // cout<<"[_getMatchScoreDictList] matchScoreLv1 *= 0.01;"<<matchScoreLv1<<endl;
+      // cout<<"[_getMatchScoreDictList] matchScoreLv2 *= 0.01;"<<matchScoreLv2<<endl;
       matchScoreLv1 *= 0.01;
       matchScoreLv2 *= 0.01;
     }
@@ -771,7 +838,12 @@ void ObjectTracker::_updateRemoveObjList(
       int height = objList[i].bbox.getHeight();
       // Out of ROI
       if (((pCenter.x < m_roi->x1 || pCenter.x > m_roi->x2) && (height > m_roi->y2)))
+      {
+        cout<<"[_updateRemoveObjList] Revmoe object when it was disappear and out of ROI"<<endl;
+        cout<<"[_updateRemoveObjList] Out of ROI"<<endl;
         list.push_back(i);
+      }
+        
     }
   }
 }
@@ -790,7 +862,8 @@ void ObjectTracker::_ReID(
   // Get Number of enabled objects
   int numPrevObject = _getNumEnableObject(prevObjectList);
   int numCurrObject = _getNumEnableObject(currObjectList);
-
+  // cout<<"[_ReID] numPrevObject = "<<numPrevObject<<endl;
+  // cout<<"[_ReID] numCurrObject = "<<numCurrObject<<endl;
   // Define "Matching Score" threshold
   float tMatch = m_tMatchMultiple;
   if (numPrevObject == 1) tMatch = m_tMatchSingle;
@@ -825,22 +898,41 @@ void ObjectTracker::_ReID(
     numCompareToPrev = COMPARE_SAME;
 
   // STEP0. Calculate Disappear Threshold
+  // cout<<"[_ReID] STEP0. Start Calculate Disappear Threshold"<<endl;
   int tDisappear = _calcDisappearThreshold(numPrevObject, numCurrObject, frameInterval);
+  // cout<<"tDisappear = "<<tDisappear<<endl;
+  // cout<<"[_ReID] STEP0. End Calculate Disappear Threshold"<<endl;
 
   // STEP1. Remove objects that disappear for a long time
+  // cout<<"[_ReID]  STEP1. Start Remove objects that disappear for a long time"<<endl;
   vector<int> idxToRemoveList;
   _updateRemoveObjList(prevObjectList, idxToRemoveList, numPrevObject, tDisappear);
+  numCurrObject = _getNumEnableObject(currObjectList);  // update current object number
+  numPrevObject = _getNumEnableObject(prevObjectList);
+  // cout<<"[_ReID] numPrevObject = "<<numPrevObject<<endl;
+  // cout<<"[_ReID] numCurrObject = "<<numCurrObject<<endl;
+  // cout<<"[_ReID]  STEP1. End Remove objects that disappear for a long time"<<endl;
 
   // STEP2. Increase prev objects's disappear counter
+  // cout<<"STEP3. Start STEP2. Increase prev objects's disappear counter"<<endl;
   _increaseDisappearCounter(prevObjectList);
-
+  // cout<<"STEP3. End STEP2. Increase prev objects's disappear counter"<<endl;
   // STEP3. Get all enabled key object id from prev frame
+  // cout<<"STEP3. Start Get all enabled key object id from prev frame"<<endl;
   vector<int> prevKeyIdList = _getEnableKeyIdList(prevObjectList);
-
+  // cout<<"prevObjectList.size()"<<prevObjectList.size()<<endl;
+  // cout<<"prevKeyIdList.size()"<<prevKeyIdList.size()<<endl;
+  // cout<<"STEP3. End Get all enabled key object id from prev frame"<<endl;
   // STEP4. Disable be overlapped bounding boxes
+  // Alsiter note 2023-12-19
+  // cout<<"[_ReID] STEP4. Start Disable be overlapped bounding boxes"<<endl;
   _disableOverlapObject(currObjectList);
-  numCurrObject = _getNumEnableObject(currObjectList);  // update current object number
-
+  // numCurrObject = _getNumEnableObject(currObjectList);  // update current object number
+  // numPrevObject = _getNumEnableObject(prevObjectList);
+  // cout<<"[_ReID] numPrevObject = "<<numPrevObject<<endl;
+  // cout<<"[_ReID] numCurrObject = "<<numCurrObject<<endl;
+  // cout<<"[_ReID] currObjectList.size() = "<<currObjectList.size()<<endl;
+  // cout<<"[_ReID] STEP4. End Disable be overlapped bounding boxes"<<endl;
 #if defined (SPDLOG)
   if (m_debugMode)
   {
@@ -850,22 +942,35 @@ void ObjectTracker::_ReID(
 
   // STEP5. Calculate Matching Score
   // => queryMatchScoreDict = {queryID: [{keyID_1: MS_1}, {keyID_2: MS_2}, ...]}
-  vector<pair<int, vector<pair<int, float>>>> queryMatchScoreDict;
+  vector<pair<int, vector<pair<int, float> > > > queryMatchScoreDict;
   vector<pair<int, vector<pair<int, float>>>> queryMatchScoreDictBkp;
 
+  // cout<<"[_ReID]STEP5. Calculate Matching Score"<<endl;
   _getQueryMatchScoreDict(
     currObjectList,
     prevObjectList,
     prevKeyIdList,
     queryMatchScoreDict,
     queryMatchScoreDictBkp);
-
+  // numPrevObject = _getNumEnableObject(prevObjectList);
+  // numCurrObject = _getNumEnableObject(currObjectList);
+  // cout<<"[_ReID] numPrevObject = "<<numPrevObject<<endl;
+  // cout<<"[_ReID] numCurrObject = "<<numCurrObject<<endl;
+  // cout<<"[_ReID]currObjectList.size()"<<currObjectList.size()<<endl;
+  // cout<<"[_ReID]prevObjectList.size()"<<prevObjectList.size()<<endl;
+  // cout<<"[_ReID]prevKeyIdList.size()"<<prevKeyIdList.size()<<endl;
   // STEP6. Self Attention => query vs. key
   // For each query id, find key id with max match score
   // => selfMatchScoreDict = {queryID: {keyID: MS}}
+  // cout<<"[_ReID]STEP6. Self Attention => query vs. key"<<endl;
   vector<pair<int, pair<int, float>>> selfMatchScoreDict;
   selfMatchScoreDict = _getSelfMatchScoreDict(queryMatchScoreDict, tMatch);
 
+  numPrevObject = _getNumEnableObject(prevObjectList);
+  numCurrObject = _getNumEnableObject(currObjectList);
+  // cout<<"[_ReID] numPrevObject = "<<numPrevObject<<endl;
+  // cout<<"[_ReID] numCurrObject = "<<numCurrObject<<endl;
+  // cout<<"[_ReID]STEP7. Cross Attention => Key vs. Query"<<endl;
   // STEP7. Cross Attention => Key vs. Query
   // => crossMatchScoreDict = {keyID: {queryID: MS}}
   vector<pair<int, pair<int, float>>> crossMatchScoreDict;
@@ -877,17 +982,28 @@ void ObjectTracker::_ReID(
     numCompareToPrev,
     numCurrObject,
     numPrevObject);
-
+  numPrevObject = _getNumEnableObject(prevObjectList);
+  numCurrObject = _getNumEnableObject(currObjectList);
+  // cout<<"[_ReID] numPrevObject = "<<numPrevObject<<endl;
+  // cout<<"[_ReID] numCurrObject = "<<numCurrObject<<endl;
   // STEP8. Update previous objects
+  // cout<<"STEP8. Start Update previous objects"<<endl;
   _updatePrevObjectList(
     crossMatchScoreDict, prevObjectList, currObjectList, prevKeyIdList);
-
+  numPrevObject = _getNumEnableObject(prevObjectList);
+  numCurrObject = _getNumEnableObject(currObjectList);
+  // cout<<"[_ReID] numPrevObject = "<<numPrevObject<<endl;
+  // cout<<"[_ReID] numCurrObject = "<<numCurrObject<<endl;
+  // cout<<"prevKeyIdList.size()"<<prevKeyIdList.size()<<endl;
+  // cout<<"STEP8. End Update previous objects"<<endl;
   // STEP9. Output tracking result
+  // cout<<"STEP9. Output tracking result"<<endl;
+  // cout<<"prevObjectList.size()"<<prevObjectList.size()<<endl;
   for (int i=0; i<(int)prevObjectList.size(); i++)
   {
     Object *ptrPrevObj = &prevObjectList[i];
     int id = ptrPrevObj->id;
-    if (m_debugMode) cout << "Obj[" << i << "]:";
+    if (m_debugMode) cout << "[_ReID] Obj[" << i << "]:";
     // if (!isKeyInDict(id, idxToRemoveList) && ptrPrevObj->getStatus() == 1)
     if ((ptrPrevObj->disappearCounter < tDisappear) && ptrPrevObj->getStatus() == 1)
     {
@@ -897,7 +1013,7 @@ void ObjectTracker::_ReID(
     else
     {
       prevObjectList[i].init(m_frameStamp);
-      if (m_debugMode) cout << "init()" << endl;
+      if (m_debugMode) cout << "[_ReID] init()" << endl;
     }
   }
 
@@ -937,6 +1053,7 @@ void ObjectTracker::_getQueryMatchScoreDict(
 
     if (ptrQueryObj->getStatus() == 0)
       continue;
+
 
 #if defined (SPDLOG)
     if (m_debugMode) m_logger->debug("Query ID [{}] calculate match score ...", queryId);
@@ -1584,27 +1701,33 @@ float ObjectTracker::_calcSimilarityScore(Object &objKey, Object &objQuery)
 
   avgAngleQuery /= objQuery.m_currKpts.size();
   avgAngleKey /= objKey.m_currKpts.size();
-
+  // cout<<"[_calcSimilarityScore] objQuery.m_currKpts.size() =  "<<objQuery.m_currKpts.size()<<endl;
+  // cout<<"[_calcSimilarityScore] objKey.m_currKpts.size() = "<<objKey.m_currKpts.size()<<endl;
+  // cout<<"[_calcSimilarityScore] avgAngleQuery /= objQuery.m_currKpts.size() = "<<avgAngleQuery<<endl;
+  // cout<<"[_calcSimilarityScore] avgAngleKey /= objKey.m_currKpts.size() = "<<avgAngleKey<<endl;
 #if defined (SPDLOG)
   m_logger->debug("=> avg angle (Query) = {}", avgAngleQuery);
   m_logger->debug("=> avg angle (Key) = {}", avgAngleKey);
 #endif
 
   float angleDiff = abs(avgAngleQuery - avgAngleKey);
+  // cout<<"[_calcSimilarityScore] angleDiff = abs(avgAngleQuery - avgAngleKey) = "<<angleDiff<<endl;
   float similarityScore = 1.0 - angleDiff/360.0;
-
+  // cout<<"[_calcSimilarityScore] similarityScore = 1.0 - angleDiff/360.0 = "<<similarityScore<<endl;
   // ratio of bounding box area
   float areaKey = objKey.bbox.getArea();
   float areaQuery = objQuery.bbox.getArea();
   float rArea = 1.0 - (abs(areaKey-areaQuery) / max(areaKey, areaQuery));
-
+  // cout<<"[_calcSimilarityScore] rArea = 1.0 - (abs(areaKey-areaQuery) / max(areaKey, areaQuery)) = "<<rArea<<endl;
 #if defined (SPDLOG)
   m_logger->debug("=> rArea = {}", rArea);
 #endif
 
   similarityScore *= rArea;
-
-  return similarityScore;
+  // cout<<"similarityScore *= rArea = "<<similarityScore<<endl;
+  // return similarityScore;
+  // Alister set 1 (2023-12-26)
+  return 1;
 }
 
 
@@ -1790,7 +1913,7 @@ void ObjectTracker::_filterOverlapObject()
 #if defined (SPDLOG)
   auto m_logger = spdlog::get(m_loggerStr);
 #endif
-
+  // cout<<"[_filterOverlapObject] before m_prevObjList.size() = "<<m_prevObjList.size()<<endl;
   for (int i=0; i<m_prevObjList.size(); i++)
   {
     if (m_prevObjList[i].getStatus() == 0)
@@ -1820,6 +1943,7 @@ void ObjectTracker::_filterOverlapObject()
       }
     }
   }
+  // cout<<"[_filterOverlapObject] End m_prevObjList.size() = "<<m_prevObjList.size()<<endl;
 }
 
 

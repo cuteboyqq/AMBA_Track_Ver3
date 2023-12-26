@@ -775,7 +775,7 @@ void YoloV8_Class::yolov8_thread_join()
 
 cv::Mat YoloV8_Class::Get_img()
 {
-	cv::Mat bgr = cv::Mat::zeros(1920,1080,CV_8UC3); //rows,cols
+	cv::Mat bgr = cv::Mat::zeros(1080,1920,CV_8UC3); //rows,cols
 	int rval;
 	// pthread_mutex_t mutex = PTHREAD_MUTEX_INITIALIZER;
 	cout<<"Start if(live_ctx->thread_ctx.thread->nn_arm_ctx.bgr!=NULL)"<<endl;
@@ -793,7 +793,8 @@ cv::Mat YoloV8_Class::Get_img()
 	else
 	{	
 		// bgr = cv::Mat::zeros(1920,1080,CV_8UC3);
-		bgr = cv::Mat::zeros(1920,1080,CV_8UC3);
+		cout<<"Get_img : else, assign a bgr = cv::Mat::zeros(1080,1920,CV_8UC3) and return bgr "<<endl;
+		bgr = cv::Mat::zeros(1080,1920,CV_8UC3);
 	}
 
 	return bgr;
@@ -910,20 +911,31 @@ int YoloV8_Class::Get_Yolov8_Bounding_Boxes_Ver2(v8xyxy bboxList[MAX_YOLO_BBX], 
 			// float x2 = float(yolov8_result->bbox[i].x_end);
 			// float y2 = float(yolov8_result->bbox[i].y_end);
 			// cout<<"[Get_Yolov8_Bounding_Boxes] x1:"<<x1<<" y1:"<<y1<<" x2:"<<x2<<" y2:"<<y2<<endl;
-			if(x1>0 && x2>0 && y1>0 && y2>0 && x1<x2 && y1<y2 && x1<400 && y1<400 && x2<400 && y2<400)
+			if(x1>0 && x2>0 && y1>0 && y2>0 && x1<x2 && y1<y2)
 			{	
 				struct v8xyxy bb;
 				 	bb.x1 = x1;
 					bb.y1 = y1;
-					bb.x2 = x2;
-					bb.y2 = y2;
+					if(x2>415)
+						bb.x2 = 415;
+					else
+						bb.x2 = x2;
+
+					if(y2>415)
+					{
+					    bb.y2 = 415;
+					}
+					else
+						bb.y2 = y2;
+
 					bb.c_prob = c_prob; // class probability, apply sigmoid()
 					bb.c = id; // class
 				
 				bboxList[i] = bb;
 				bbx_number+=1;
-				// bboxList.push_back(bb);
+			    // bboxList.push_back(bb);
 			}
+		
 			
 
 		}
@@ -1336,34 +1348,34 @@ int YoloV8_Class::live_update_net_output(live_ctx_t *live_ctx,
 	ea_queue_t *queue = NULL;
 	int i;
 	vp_output_t *tmp;
-	cout<<"[live_update_net_output] Start do while"<<endl;
+	// cout<<"[live_update_net_output] Start do while"<<endl;
 	do {
-		cout<<"[live_update_net_output] Start post_thread_queue"<<endl;
+		// cout<<"[live_update_net_output] Start post_thread_queue"<<endl;
 		queue = post_thread_queue(&live_ctx->thread_ctx);
-		cout<<"[live_update_net_output] End post_thread_queue"<<endl;
+		// cout<<"[live_update_net_output] End post_thread_queue"<<endl;
 
-		cout<<"[live_update_net_output] Start Create ea_queue_request_carrier"<<endl;
+		// cout<<"[live_update_net_output] Start Create ea_queue_request_carrier"<<endl;
 		*vp_output = (vp_output_t *)ea_queue_request_carrier(queue);
-		cout<<"[live_update_net_output] End Create ea_queue_request_carrier"<<endl;
+		// cout<<"[live_update_net_output] End Create ea_queue_request_carrier"<<endl;
 
-		cout<<"Start check *vp_output != NULL"<<endl;
+		// cout<<"Start check *vp_output != NULL"<<endl;
 		RVAL_ASSERT(*vp_output != NULL);
-		cout<<"End check *vp_output != NULL"<<endl;
+		// cout<<"End check *vp_output != NULL"<<endl;
 
 		tmp = *vp_output;
 
-		cout<<"[live_update_net_output] Start Assign tmp->out_num"<<endl;
+		// cout<<"[live_update_net_output] Start Assign tmp->out_num"<<endl;
 		tmp->out_num = live_ctx->nn_cvflow.out_num;
-		cout<<"[live_update_net_output] End Assign tmp->out_num"<<endl;
+		// cout<<"[live_update_net_output] End Assign tmp->out_num"<<endl;
 
-		cout<<"[live_update_net_output] Start for loop ea_net_update_output"<<endl;
+		// cout<<"[live_update_net_output] Start for loop ea_net_update_output"<<endl;
 		for (i = 0; i < tmp->out_num; i++) {
 			ea_net_update_output(live_ctx->nn_cvflow.net, tmp->out[i].tensor_name,
 				tmp->out[i].out);
 		}
-		cout<<"[live_update_net_output] End for loop ea_net_update_output"<<endl;
+		// cout<<"[live_update_net_output] End for loop ea_net_update_output"<<endl;
 	} while (0);
-	cout<<"[live_update_net_output] End do while"<<endl;
+	// cout<<"[live_update_net_output] End do while"<<endl;
 	return rval;
 };
 
@@ -1452,18 +1464,18 @@ int YoloV8_Class::live_run_loop_without_dummy(live_ctx_t *live_ctx,
 	nn_input_ops_type_t *ops = NULL;
 	memset(&calc_fps_ctx, 0, sizeof(ea_calc_fps_ctx_t));
 	int fps_notice_flag = 0;
-	cout<<"[live_run_loop_without_dummy] Start do while"<<endl;
+	// cout<<"[live_run_loop_without_dummy] Start do while"<<endl;
 	do {
 		RVAL_ASSERT(live_ctx != NULL);
 		ops = live_ctx->nn_input_ctx.ops;
 		RVAL_ASSERT(ops->nn_input_hold_data != NULL);
-		cout<<"Start live_update_net_output"<<endl;
+		// cout<<"Start live_update_net_output"<<endl;
 		RVAL_OK(YoloV8_Class::live_update_net_output(live_ctx, &vp_output));
-		cout<<"End live_update_net_output"<<endl;
+		// cout<<"End live_update_net_output"<<endl;
 
-		cout<<"Start post_thread_get_img_set"<<endl;
+		// cout<<"Start post_thread_get_img_set"<<endl;
 		img_set = post_thread_get_img_set(&live_ctx->thread_ctx, live_ctx->seq);
-		cout<<"End post_thread_get_img_set"<<endl;
+		// cout<<"End post_thread_get_img_set"<<endl;
 		live_ctx->seq++;
 		for (i = 0; i < live_ctx->nn_cvflow.in_num; i++) {
 			RVAL_OK(ops->nn_input_hold_data(&live_ctx->nn_input_ctx,
@@ -1506,12 +1518,12 @@ int YoloV8_Class::live_run_loop_without_dummy(live_ctx_t *live_ctx,
 			RVAL_OK(ea_tensor_sync_cache(vp_output->out[i].out, EA_VP, EA_CPU));
 		}
 		RVAL_BREAK();
-		cout<<"[live_run_loop_without_dummy] Start post_thread_queue"<<endl;
+		// cout<<"[live_run_loop_without_dummy] Start post_thread_queue"<<endl;
 		queue = post_thread_queue(&live_ctx->thread_ctx);
-		cout<<"[live_run_loop_without_dummy] End post_thread_queue"<<endl;
+		// cout<<"[live_run_loop_without_dummy] End post_thread_queue"<<endl;
 		RVAL_OK(ea_queue_en(queue, vp_output));
 	} while (0);
-	cout<<"[live_run_loop_without_dummy] End do while"<<endl;
+	// cout<<"[live_run_loop_without_dummy] End do while"<<endl;
 	// return rval;
 	return live_ctx->sig_flag;
 };

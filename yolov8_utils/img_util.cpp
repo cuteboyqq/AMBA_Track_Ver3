@@ -610,7 +610,7 @@ namespace imgUtil
   //
   void cropImages(cv::Mat &img, cv::Mat &imgCrop, BoundingBox &box)
   {
-    cout<<"in cropImages---------------"<<endl;
+    // cout<<"in cropImages---------------"<<endl;
     int w = 0;
     int h = 0;
 
@@ -644,22 +644,22 @@ namespace imgUtil
     // }
 
 
-    cout<<"[img]img.rows = "<<img.rows<<endl;
-    cout<<"[img]img.cols = "<<img.cols<<endl;
+    // cout<<"[img]img.rows = "<<img.rows<<endl;
+    // cout<<"[img]img.cols = "<<img.cols<<endl;
 
-    cout<<"[cropImages]box.x1 = "<<box.x1<<endl;
-    cout<<"[cropImages]box.y1 = "<<box.y1<<endl;
-    cout<<"[cropImages]w = "<<w<<endl;
-    cout<<"[cropImages]h = "<<h<<endl;
+    // cout<<"[cropImages]box.x1 = "<<box.x1<<endl;
+    // cout<<"[cropImages]box.y1 = "<<box.y1<<endl;
+    // cout<<"[cropImages]w = "<<w<<endl;
+    // cout<<"[cropImages]h = "<<h<<endl;
 
-    cout<<"Start Get roi(box.x1, box.y1, w, h)"<<endl;
+    // cout<<"Start Get roi(box.x1, box.y1, w, h)"<<endl;
     cv::Rect roi(box.x1, box.y1, w, h);
-    cout<<"End Get roi(box.x1, box.y1, w, h)"<<endl;
+    // cout<<"End Get roi(box.x1, box.y1, w, h)"<<endl;
 
-    cout<<"Start imgCrop = img(roi)"<<endl;
+    // cout<<"Start imgCrop = img(roi)"<<endl;
     imgCrop = img(roi);
     // imgCrop = img;
-    cout<<"End imgCrop = img(roi)"<<endl;
-    cout<<"end cropImages---------------"<<endl;
+    // cout<<"End imgCrop = img(roi)"<<endl;
+    // cout<<"end cropImages---------------"<<endl;
   }
 }
